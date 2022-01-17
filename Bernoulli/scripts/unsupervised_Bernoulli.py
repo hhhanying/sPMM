@@ -6,6 +6,8 @@ from sklearn.model_selection import KFold
 
 def train_unsupervised(X, Y, K, b, alpha, alpha_p, beta_p, ntrace, nchain, nskip):
     '''
+    Given training set and hyperparameters, estimate the parameters of the model and the estimated SVM.
+
     X, Y: training set
     Y is only used for training SVM
     K: total topic numbers
@@ -13,6 +15,10 @@ def train_unsupervised(X, Y, K, b, alpha, alpha_p, beta_p, ntrace, nchain, nskip
     (here we use all-one-vector as alpha)
     alpha_p, beta_p: the hyperparameter for the prior of success probability (Beta distribution)
     ntrace, nchain, nskip: parameters of sampling
+
+    output: a directionary and a classifier.
+    a,rho, P: estimate of parameters
+    U: estimate of memberships of training set
     '''
     
     N = len(X)
@@ -48,11 +54,16 @@ def train_unsupervised(X, Y, K, b, alpha, alpha_p, beta_p, ntrace, nchain, nskip
 
 def predict_unsupervised(X, estimate, classifier, ntrace, nchain, nskip):
     '''
+    Given the test set, the estimated parameters of model and the estimated SVM, predict the labels and estimate the memberships.
+
     X: test set
     estimate: parameters estimated from training set, a dictionary containing a, rho and P 
     classifier: the SVM trained from training set
     ntrace, nchain, nskip: parameters of sampling
-    output: estimated label Y and membership U
+
+    output: a directionary.
+    U: estimate of memberships of test set
+    Y: estimate of labels of test set
     '''
     
     N = len(X)
@@ -84,13 +95,13 @@ def predict_unsupervised(X, estimate, classifier, ntrace, nchain, nskip):
 
 def accuracy_unsupervised_Bernoulli(trainingX, trainingY, testX, testY, alpha_p, beta_p, K, b, alpha, ntrace, nchain, nskip):
     # Given the training set, test set and needed parameters
-    # this function will return the test accuracy
+    # this function will return the test accuracy, the estimated parameters of model and the estimated SVM
     estimation, classifier = train_unsupervised(trainingX, trainingY, K, b, alpha, alpha_p, beta_p, ntrace, nchain, nskip)
     prediction = predict_unsupervised(testX, estimation, classifier, ntrace, nchain, nskip)
     Ntest = len(testY)
     accuracy = sum(testY == prediction["Y"])/Ntest
     print(accuracy)
-    return accuracy
+    return accuracy, estimation, classifier
 
 def CV_unsupervised_Bernoulli(X, Y, Nfold, alpha_p, beta_p, K, b, alpha, ntrace, nchain, nskip):
     # Given the training set
@@ -100,7 +111,14 @@ def CV_unsupervised_Bernoulli(X, Y, Nfold, alpha_p, beta_p, K, b, alpha, ntrace,
     # It's defined by the user. We choose all-1-vector here
     kf = KFold(n_splits=Nfold)
     res = []
+    best_accuracy = 0
+
     for train_index, test_index in kf.split(X):
-        tem_accuracy = accuracy_unsupervised_Bernoulli(X[train_index], Y[train_index], X[test_index], Y[test_index], alpha_p, beta_p, K, b, alpha, ntrace, nchain, nskip)
+        tem_accuracy, tem_estimation, tem_classifier = accuracy_unsupervised_Bernoulli(X[train_index], Y[train_index], X[test_index], Y[test_index], alpha_p, beta_p, K, b, alpha, ntrace, nchain, nskip)
         res.append(tem_accuracy)
-    return res 
+        
+        if tem_accuracy > best_accuracy:
+            best_accuracy = tem_accuracy
+            best_estimation = tem_estimation
+            best_classifier = tem_classifier
+    return res, best_estimation, best_classifier

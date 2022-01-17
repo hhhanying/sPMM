@@ -1,0 +1,19 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable=random.sh
+transfer_input_files=/home/hjiang252/Bernoulli/configurations/configurations_random.csv, /home/hjiang252/Bernoulli/scripts/bernoulli.py, /home/hjiang252/Bernoulli/scripts/data_generator_Bernoulli.py, /home/hjiang252/Bernoulli/scripts/supervised_Bernoulli.py, /home/hjiang252/Bernoulli/scripts/unsupervised_Bernoulli.py
+
+# requesting resources
+request_memory=15GB
+request_cpus=1
+request_disk=15GB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/Bernoulli/res/random/err$(Process).err
+output= //home/hjiang252/Bernoulli/res/random/out$(Process).out
+log= /home/hjiang252/Bernoulli/res/random/log$(Process).log
+queue 600
