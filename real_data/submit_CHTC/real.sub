@@ -1,0 +1,18 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable=real.sh
+transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/codes/test_training.py
+# requesting resources
+request_memory=15GB
+request_cpus=1
+request_disk=15GB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/real_data/err$(Process).err
+output= //home/hjiang252/real_data/out$(Process).out
+log= /home/hjiang252/real_data/log$(Process).log
+queue 10
