@@ -63,10 +63,13 @@ def train_unsupervised(X, Y, K, b, alpha, mu_Mu, sigma2_Mu, alpha_Lambda, beta_L
 
 def predict_unsupervised(X, estimate, classifier, ntrace, nchain, nskip): 
     '''
+    Given the test set, the estimated parameters of model and the estimated SVM, predict the labels and estimate the memberships.
+
     X: test set
-    estimate: parameters estimated from training set, a dictionary containing a, rho and P 
+    estimate: parameters estimated from training set, a dictionary containing a, rho, Mu and Lambda
     classifier: the SVM trained from training set
     ntrace, nchain, nskip: parameters of sampling
+
     output: estimated label Y and membership U
     '''
     
@@ -102,23 +105,31 @@ def predict_unsupervised(X, estimate, classifier, ntrace, nchain, nskip):
 
 def accuracy_unsupervised_Normal(trainingX, trainingY, testX, testY, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, K, b, alpha, ntrace, nchain, nskip):
     # Given the training set, test set and needed parameters
-    # this function will return the test accuracy
+    # this function will return the test accuracy, the estimated parameters of model and the estimated SVM
     estimation, classifier = train_unsupervised(trainingX, trainingY, K, b, alpha, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, ntrace, nchain, nskip)
     prediction = predict_unsupervised(testX, estimation, classifier, ntrace, nchain, nskip)
     Ntest = len(testY)
     accuracy = sum(testY == prediction["Y"])/Ntest
-    print(accuracy)
-    return accuracy      
-
+    return accuracy, estimation, classifier      
+    
 def CV_unsupervised_Normal(X, Y, Nfold, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, K, b, alpha, ntrace, nchain, nskip):
     # Given the training set
     # This function will perform K-fold cross validation and return the list of the accuracies
-    # Notica the alpha here is not the same as the alpha used before
+    # Notice the alpha here is not the same as the alpha used before
     # Its dimension become K
     # It's defined by the user. We choose all-1-vector here
+
     kf = KFold(n_splits = Nfold)
     res = []
+    best_accuracy = 0
+
     for train_index, test_index in kf.split(X):
-        tem_accuracy = accuracy_unsupervised_Normal(X[train_index], Y[train_index], X[test_index], Y[test_index], mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, K, b, alpha, ntrace, nchain, nskip):        
+        tem_accuracy, tem_estimation, tem_classifier = accuracy_unsupervised_Normal(X[train_index], Y[train_index], X[test_index], Y[test_index], mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, K, b, alpha, ntrace, nchain, nskip)
         res.append(tem_accuracy)
-    return res     
+        
+        if tem_accuracy > best_accuracy:
+            best_accuracy = tem_accuracy
+            best_estimation = tem_estimation
+            best_classifier = tem_classifier
+    return res, best_estimation, best_classifier
+ 

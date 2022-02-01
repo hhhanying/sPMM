@@ -1,0 +1,19 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable=random.sh
+transfer_input_files=/home/hjiang252/Normal/configurations/configurations_random.csv, /home/hjiang252/Normal/scripts/normal.py, /home/hjiang252/Normal/scripts/data_generator_Normal.py, /home/hjiang252/Normal/scripts/supervised_Normal.py, /home/hjiang252/Normal/scripts/unsupervised_Normal.py
+
+# requesting resources
+request_memory=10GB
+request_cpus=1
+request_disk=10GB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/Normal/res/random/err$(Process).err
+output= //home/hjiang252/Normal/res/random/out$(Process).out
+log= /home/hjiang252/Normal/res/random/log$(Process).log
+queue 600

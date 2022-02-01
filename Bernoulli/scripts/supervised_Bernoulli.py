@@ -111,7 +111,6 @@ def accuracy_supervised_Bernoulli(trainingX, trainingY, testX, testY, T, alpha_p
     prediction = predict_supervised(testX, estimation, T, ntrace, nchain, nskip)
     Ntest = len(testY)
     accuracy = sum(testY == prediction["Y"])/Ntest
-    print(accuracy)
     return accuracy, estimation
 
 def CV_supervised_Bernoulli(X, Y, Nfold, T, alpha_p, beta_p, K, b, alpha, ntrace, nchain, nskip):

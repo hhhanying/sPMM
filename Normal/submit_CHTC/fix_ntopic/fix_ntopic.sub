@@ -1,0 +1,19 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable=fix_ntopic.sh
+transfer_input_files=/home/hjiang252/Normal/configurations/configurations_fix_ntopic.csv, /home/hjiang252/Normal/scripts/normal.py, /home/hjiang252/Normal/scripts/data_generator_Normal.py, /home/hjiang252/Normal/scripts/supervised_Normal.py, /home/hjiang252/Normal/scripts/unsupervised_Normal.py
+
+# requesting resources
+request_memory=15GB
+request_cpus=1
+request_disk=15GB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/Normal/res/fix_ntopic/err$(Process).err
+output= /home/hjiang252/Normal/res/fix_ntopic/out$(Process).out
+log= /home/hjiang252/Normal/res/fix_ntopic/log$(Process).log
+queue 130

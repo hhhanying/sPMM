@@ -100,13 +100,12 @@ def accuracy_unsupervised_Bernoulli(trainingX, trainingY, testX, testY, alpha_p,
     prediction = predict_unsupervised(testX, estimation, classifier, ntrace, nchain, nskip)
     Ntest = len(testY)
     accuracy = sum(testY == prediction["Y"])/Ntest
-    print(accuracy)
     return accuracy, estimation, classifier
 
 def CV_unsupervised_Bernoulli(X, Y, Nfold, alpha_p, beta_p, K, b, alpha, ntrace, nchain, nskip):
     # Given the training set
     # This function will perform K-fold cross validation and return the list of the accuracies
-    # Notica the alpha here is not the same as the alpha used before
+    # Notice the alpha here is not the same as the alpha used before
     # Its dimension become K
     # It's defined by the user. We choose all-1-vector here
     kf = KFold(n_splits=Nfold)

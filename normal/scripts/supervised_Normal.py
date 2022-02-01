@@ -126,7 +126,6 @@ def accuracy_supervised_Normal(trainingX, trainingY, testX, testY, T, mu_Mu, sig
     prediction = predict_supervised(testX, estimation, T, ntrace, nchain, nskip)
     Ntest = len(testY)
     accuracy = sum(testY == prediction["Y"])/Ntest
-    print(accuracy)
     return accuracy, estimation   
 
 def CV_supervised_Normal(X, Y, Nfold, T, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, K, b, alpha, ntrace, nchain, nskip):
