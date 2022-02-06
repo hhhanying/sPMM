@@ -1,3 +1,5 @@
 Bernoulli/configurations/help.py
 Bernoulli/res/
 .Rproj.user
+.DS_Store
+real_data/test/

@@ -1,8 +1,0 @@
-import numpy as np
-import json
-x = np.array(list(range(30))).reshape((5,6))
-print(type(x) is np.array)
-print(type(x) is type(np.array([1])))
-print(type(1) is type(np.array([1])))
-d = {"a":[1,2]}
-print(json.dumps(d))
