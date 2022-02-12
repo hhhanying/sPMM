@@ -5,15 +5,15 @@ executable=supervised.sh
 transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/configurations/configurations_MOFA.csv,/home/hjiang252/real_data/scripts/test.py
 
 # requesting resources
-request_memory=1GB
+request_memory=12GB
 request_cpus=1
-request_disk=1GB
+request_disk=3GB
 
 # parameters
 environment="id=$(Step)"
 
 # log files
-error= /home/hjiang252/real_data/res/test/err$(Process).err
-output= /home/hjiang252/real_data/res/test/out$(Process).out
-log= /home/hjiang252/real_data/res/test/log$(Process).log
+error= /home/hjiang252/real_data/res/test/err1$(Process).err
+output= /home/hjiang252/real_data/res/test/out1$(Process).out
+log= /home/hjiang252/real_data/res/test/log1$(Process).log
 queue 2
