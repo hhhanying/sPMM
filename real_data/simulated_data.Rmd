@@ -1,0 +1,16 @@
+---
+title: "simulation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+k0 = 9
+getwd()
+su = paste("./res/simulated/sim_x_su_",as.character(k0),".csv", sep = '')
+print(su)
+supervised = read.csv(su, header = FALSE)
+```
+

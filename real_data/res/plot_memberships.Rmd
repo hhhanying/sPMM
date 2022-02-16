@@ -1,0 +1,139 @@
+---
+title: "plot"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r,echo=FALSE,message=FALSE}
+library(data.table)
+library(tidyverse)
+library(purrr)
+library(ggplot2)
+library(ggpubr)
+library(MOFA2)
+library(dplyr)
+```
+```{r}
+metadata <- fread("ftp://ftp.ebi.ac.uk/pub/databases/mofa/microbiome/metadata.txt.gz")
+metadata = metadata %>% filter(sample!="TKI_F22" & sample != "TKI_F56") %>%
+  select(sample,Age,Sexs,Category)
+```
+```{r,echo=FALSE}
+# choose a result to analyze
+k0 = 9 # 1-15
+nfold = 3 # 0-4
+meth = "supervised"
+```
+```{r,echo=FALSE}
+# membership
+dat = read.csv("../data/cleaned_data.csv")
+file_name=paste("./model/",meth,"_",as.character(k0),"_",as.character(nfold),"_U.txt",sep = "")
+membership = read.csv(file_name,header=FALSE)
+colnames(membership)=c("index",paste("topic",1:(5*k0),sep=""))
+membership$sample = sapply(membership$index, FUN = function(x) dat$sample[x] )
+dat = merge(membership,metadata,by="sample",sort=FALSE)
+
+file_name=paste("./model/",meth,"_",as.character(k0),"_",as.character(nfold),"_G.txt",sep = "")
+membershipG = read.csv(file_name,header=FALSE)
+colnames(membershipG)=c("index",paste("topic",1:(2*k0),sep=""))
+membershipG$sample = membership$sample
+datG = merge(membershipG,metadata,by="sample",sort=FALSE)
+```
+
+```{r}
+# choose a topic: 1 to 5*k0
+topic = 1
+
+# look at membership vs. age
+dat %>%filter(!is.na(Age))%>%
+  ggplot(aes_string(x="Age", y = paste("topic",topic,sep=""))) + geom_point(size=0.7)
+
+# sex
+dat %>% ggplot(aes_string(x="Sexs", y = paste("topic",topic,sep=""))) + geom_point(size=0.7)
+
+ggboxplot(dat,x="Sexs", y = paste("topic",topic,sep=""))
+```
+```{r}
+#dat %>% pivot_longer(!sample & !index &!Age &!Category &!Sexs, names_to="topic", values_to="membership") %>%
+  #filter(membership>0.00001) %>%
+#  ggboxplot(x="topic", y = "membership", color="Sexs")
+```
+```{r}
+dg = datG %>% pivot_longer(!sample & !index &!Age &!Category &!Sexs, names_to="topic", values_to="membership") 
+dg %>%
+  mutate(topic = sapply(dg$topic, FUN=function(x) substr(x,6,10))) %>%
+  ggboxplot(x="topic", y = "membership", color="Sexs") 
+```
+```{r}
+t1 = 10
+t2 = 11
+datG %>%
+  ggplot(aes_string(x=paste("topic",as.character(t1), sep=""),y=paste("topic",as.character(t2), sep=""))) +
+  geom_point()
+```
+
+
+```{r,echo=FALSE}
+# membership
+meth = "unsupervised"
+dat = read.csv("../data/cleaned_data.csv")
+file_name=paste("./model/",meth,"_",as.character(k0),"_",as.character(nfold),"_U.txt",sep = "")
+membership = read.csv(file_name,header=FALSE)
+colnames(membership)=c("index",paste("topic",1:(5*k0),sep=""))
+membership$sample = sapply(membership$index, FUN = function(x) dat$sample[x] )
+dat = merge(membership,metadata,by="sample",sort=FALSE)
+
+dg = dat %>% pivot_longer(!sample & !index &!Age &!Category &!Sexs, names_to="topic", values_to="membership")
+dg %>%
+  mutate(topic = sapply(dg$topic, FUN=function(x) substr(x,6,10))) %>%
+  ggboxplot(x="topic", y = "membership", color="Sexs") + 
+  theme(axis.text = element_text(size = 5))   
+
+
+```
+```{r}
+meth = "supervised"
+file_name=paste("./model/",meth,"_",as.character(k0),"_",as.character(nfold),"_S.txt",sep = "")
+Mu_su = read.csv(file_name,header=FALSE)
+
+file_name=paste("./model/",meth,"_",as.character(k0),"_",as.character(nfold),"_Mu.txt",sep = "")
+S_su = read.csv(file_name,header=FALSE)
+```
+```{r}
+colnames(Mu_su) = paste("fea",1:240,sep="")
+rownames(Mu_su) = paste("topic",1:(5*k0),sep="")
+topic = c(5,10,11,12) # 9,3
+fea = c(1:10,180:210)
+Mus = Mu_su[topic,fea]
+
+Mus <- Mu_su[topic,fea] %>%
+  rownames_to_column() %>%
+  gather(colname, value, -rowname)
+ggplot(Mus, aes(x = rowname, y = colname, fill = value)) +
+  geom_tile()
+```
+
+```{r}
+meth = "unsupervised"
+
+file_name=paste("./model/",meth,"_",as.character(k0),"_",as.character(nfold),"_S.txt",sep = "")
+Mu_un = read.csv(file_name,header=FALSE)
+file_name=paste("./model/",meth,"_",as.character(k0),"_",as.character(nfold),"_Mu.txt",sep = "")
+S_un = read.csv(file_name,header=FALSE)
+```
+```{r}
+colnames(Mu_un) = paste("fea",1:240,sep="")
+rownames(Mu_un) = paste("topic",1:(5*k0),sep="")
+topic = c(2,9,14,31) # 9,3
+fea = c(1:10,180:210)
+Mus_un = Mu_un[topic,fea]
+
+Mus_un <- Mu_un[topic,fea] %>%
+  rownames_to_column() %>%
+  gather(colname, value, -rowname)
+ggplot(Mus_un, aes(x = rowname, y = colname, fill = value)) +
+  geom_tile()
+```
+

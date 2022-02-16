@@ -3,12 +3,13 @@ Normal/res/
 .Rproj.user
 **/.DS_Store
 real_data/test/
-sPMM.Rproj
+.Rproj
 real_data/res/simulated
 real_data/res/supervised
 real_data/res/unsupervised
 real_data/res/test
-real_data/res/res.txt
 real_data/res/analysis_copy.ipynb
 real_data/scripts/test.py
+real_data/res/model
 .Rhistory
+for_pre

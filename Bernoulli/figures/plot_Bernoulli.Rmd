@@ -105,7 +105,8 @@ ggplot(res,aes(x=k0,y=accuracy,color=method))+geom_point()+labs(x="number of uns
 ggplot(res,aes(x=k1,y=accuracy,color=method))+geom_point()+labs(x="number of shared topics")
 ggplot(res,aes(x=nlabel*k0-k1,y=accuracy,color=method))+geom_point()+labs(x="k0*nlabel-k1")
 ggplot(res,aes(x=d,y=accuracy,color=method))+geom_point()+labs(x="dimension of data")
-ggplot(res,aes(x=nlabel,y=accuracy,color=method))+geom_point()+labs(x="number of labels")
+ggplot(res,aes(x=nlabel,y=accuracy,color=method))+geom_point(size=0.7)+labs(x="number of labels")
+ggsave("figure5_random_nclass.png", dpi = 150, width = 6, height = 4)
 
 ```
 

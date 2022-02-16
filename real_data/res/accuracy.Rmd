@@ -1,0 +1,63 @@
+---
+title: "accuracy"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r,echo=FALSE, message=FALSE}
+library(tidyverse)
+library(ggplot2)
+dat = read.csv("../data/cleaned_data.csv")
+
+```
+
+## compare accuracy
+```{r,echo=FALSE}
+accuracy = read.csv("./accuracy/accuracy.csv")
+accuracy %>%
+  pivot_longer(supervised:unsupervised, names_to = "method", values_to = "accuracy") %>%
+  ggplot(aes(x = number_of_topic,y = accuracy, color = method)) +
+  geom_point(size=0.7) +
+  labs(x="k0 (k1=k0)")
+```
+```{r,echo=FALSE}
+accuracy = read.csv("./accuracy/accuracy_per_patient.csv")
+cati = c("Sepsis", "Non septic \n ICU", "Healthy\n no antibiotics", "Healthy\n antibiotics")
+for(i in 1:57){
+  ind = accuracy$no[i]
+  clas = dat$Category[ind]
+  accuracy$label[i]=cati[clas+1]
+}
+accuracy %>%
+  pivot_longer(supervised:unsupervised, names_to = "method", values_to = "accuracy") %>%
+  ggplot(aes(x = no,y = accuracy, color = method)) +
+  geom_point(size=0.7) +
+  labs(x="sample") 
+accuracy %>%
+  pivot_longer(supervised:unsupervised, names_to = "method", values_to = "accuracy") %>%
+ # ggplot(aes(x = no,y = accuracy, color = method)) +
+ ggplot(aes(x = label,y = accuracy, color = method)) +
+  geom_point(size=0.7) +
+  labs(x="Category")
+
+```
+
+## labels
+```{r}
+prediction = read.csv("./accuracy/prediction.csv")
+prediction$true = factor(prediction$true , levels=c(0,1,2,3), labels = c("Sepsis", "Non septic ICU", "Healthy no antibiotics", "Healthy antibiotics"))
+#prediction$prediction = factor(prediction$prediction , levels=c(0,1,2,3), labels = c("Sepsis", "Non septic ICU", "Healthy no antibiotics", "Healthy antibiotics"))
+table(prediction$true,prediction$prediction)
+
+for (i in 1:15){
+  print(i)
+  d1 = prediction %>% filter(k0==i)
+  print(table(d1$true,d1$prediction))
+}
+```
+
+
+
+

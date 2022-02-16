@@ -22,8 +22,8 @@ which_index: we perform 5-fold CV here, and this parameter detemines the way to 
 Results:
 A dictionary:
 res = {"estimation":{}, "prediction":{}}
-estimation = {a, rho, G, Mu1, Mu2, Mu3, Lambda1, Lambda2, Lambda3}
-prediction = {G, Y}
+estimation = {a, rho, U, Mu1, Mu2, Mu3, Lambda1, Lambda2, Lambda3}
+prediction = {U, Y}
 '''
 
 # get input

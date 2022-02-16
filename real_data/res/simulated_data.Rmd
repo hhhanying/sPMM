@@ -1,0 +1,39 @@
+---
+title: "simulation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(tidyverse)
+library(ggplot2)
+dat = read.csv("../data/cleaned_data.csv")
+```
+
+```{r}
+colnames(dat)[2:241] = paste("V",1:240,sep='')
+k0 = 9
+
+su = paste("./simulated/sim_x_su_",as.character(k0),".csv", sep = '')
+un = paste("./simulated/sim_x_un_",as.character(k0),".csv", sep = '')
+supervised = read.csv(su, header = FALSE)
+unsupervised = read.csv(un, header = FALSE)
+supervised$Category = sapply(supervised$V241, FUN = function(x) dat$Category[x])
+unsupervised$Category = sapply(unsupervised$V241, FUN = function(x) dat$Category[x])
+supervised$method = "supervised"
+unsupervised$method = "unsupervised"
+d1=rbind(supervised,unsupervised)%>% select(!V241)
+dat = dat %>% select(!sample)%>%
+  mutate(method="True_value")
+dat = rbind(d1,dat)
+#supervised$Category = factor(prediction$true , levels=c(0,1,2,3), labels = c("Sepsis", "Non septic ICU", "Healthy no antibiotics", "Healthy antibiotics"))
+```
+```{r}
+fea = 10
+dat %>% ggplot(aes_string(x='x' must be atomic, group="Category",fill="method"))+
+  geom_density(adjust=1.5) 
+
+```
+
