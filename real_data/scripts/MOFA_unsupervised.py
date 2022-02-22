@@ -60,12 +60,16 @@ indexes = [[1, 15, 13, 12,  8, 25, 28, 50, 41, 35, 34, 54],
 [16,  3, 18, 19, 21, 30, 24 ,51, 47, 46, 33, 55],
 [17,  0, 11 , 6 ,29 ,23 ,44 ,39 ,43 ,40, 53],
 [10,  4,  9 , 2 ,26 ,27 ,38 ,36, 32, 42 ,52],
-[5 ,22 ,20, 14 , 7 ,31 ,45, 37, 48, 49, 56]]
+[5 ,22 ,20, 14 , 7 ,31 ,45, 37, 48, 49, 56],
+list(range(58))]
 test_index = indexes[which_index]
-train_index = []
-for i in list(range(57)): 
-    if i not in set(test_index):
-        train_index.append(i)
+if which_index == 5:
+    train_index = list(range(58))
+else:
+    train_index = []
+    for i in list(range(57)): 
+        if i not in set(test_index):
+            train_index.append(i)
         
 training_X1, training_X2, training_X3 = X[train_index, 0:180], X[train_index, 180:198], X[train_index, 198:240]
 training_Y = Y[train_index]
