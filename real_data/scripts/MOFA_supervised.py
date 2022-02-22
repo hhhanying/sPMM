@@ -2,12 +2,14 @@ import numpy as np
 import sys
 import pymc3 as pm
 import theano
-from sklearn.model_selection import KFold
 from collections import Counter
 from sklearn.model_selection import KFold
 import json
 
 '''
+Changes:
+After training and testing, this file will again use the learned topics to estimate membership under unsupervised model.
+
 Input:
 1. data_file: file name of dataset (with header)
 2. confi_file: file name of configurations (with header)
@@ -21,9 +23,10 @@ which_index: we perform 5-fold CV here, and this parameter detemines the way to 
 
 Results:
 A dictionary:
-res = {"estimation":{}, "prediction":{}}
+res = {"estimation":{}, "prediction":{}, "test":{}}
 estimation = {a, rho, G, Mu1, Mu2, Mu3, Lambda1, Lambda2, Lambda3}
 prediction = {G, Y}
+test = {U}
 '''
 
 # get input
@@ -60,12 +63,16 @@ indexes = [[1, 15, 13, 12,  8, 25, 28, 50, 41, 35, 34, 54],
 [16,  3, 18, 19, 21, 30, 24 ,51, 47, 46, 33, 55],
 [17,  0, 11 , 6 ,29 ,23 ,44 ,39 ,43 ,40, 53],
 [10,  4,  9 , 2 ,26 ,27 ,38 ,36, 32, 42 ,52],
-[5 ,22 ,20, 14 , 7 ,31 ,45, 37, 48, 49, 56]]
+[5 ,22 ,20, 14 , 7 ,31 ,45, 37, 48, 49, 56],
+list(range(58))]
 test_index = indexes[which_index]
-train_index = []
-for i in list(range(57)): 
-    if i not in set(test_index):
-        train_index.append(i)
+if which_index == 5:
+    train_index = list(range(58))
+else:
+    train_index = []
+    for i in list(range(57)): 
+        if i not in set(test_index):
+            train_index.append(i)
         
 training_X1, training_X2, training_X3 = X[train_index, 0:180], X[train_index, 180:198], X[train_index, 198:240]
 training_Y = Y[train_index]
@@ -206,14 +213,49 @@ prediction["Y"] = np.array(pre_Y)
 accuracy = sum(test_Y == prediction["Y"])/Ntest
 print("accuracy:", accuracy)
 
+# test under unsupervised model
+rho = np.array([1/2/nlabel/k0] * nlabel*k0 + [1/2/k1] * k1) # redefine rho
+
+model_testing_unsupervised = pm.Model()
+with model_testing_unsupervised:
+    U_ = pm.Dirichlet("U", a=a*rho, shape = (Ntest, ntopic))
+
+    for i in range(Ntest):
+        u_ = U_[i:(i+1)]
+
+        Taux1_ = pm.math.dot(u_, Tau1_)
+        Lambdax1_ = pm.math.dot(u_, Lambda1_)
+        Sx1_ = 1/Lambdax1_
+        Mux1_ = Sx1_*Taux1_
+        X1_ = pm.Normal("x_1_"+str(i), mu=Mux1_, sigma=pm.math.sqrt(Sx1_), observed=test_X1[i])
+
+        Taux2_ = pm.math.dot(u_, Tau2_)
+        Lambdax2_ = pm.math.dot(u_, Lambda2_)
+        Sx2_ = 1/Lambdax2_
+        Mux2_ = Sx2_*Taux2_
+        X2_ = pm.Normal("x_2_"+str(i), mu=Mux2_, sigma=pm.math.sqrt(Sx2_), observed=test_X2[i])
+
+        Taux3_ = pm.math.dot(u_, Tau3_)
+        Lambdax3_ = pm.math.dot(u_, Lambda3_)
+        Sx3_ = 1/Lambdax3_
+        Mux3_ = Sx3_*Taux3_
+        X3_ = pm.Normal("x_3_"+str(i), mu=Mux3_, sigma=pm.math.sqrt(Sx3_), observed=test_X3[i])
+
+    trace = pm.sample(ntrace, chains = nchain)
+
+test = {}
+test["U"] = trace["U"][index_save].mean(axis=0)
+
+# save the result
 for i in estimate.keys():
     if type(estimate[i]) is type(np.array([1])):
         estimate[i] = estimate[i].tolist()
 for i in prediction.keys():
     prediction[i] = prediction[i].tolist()
-res = {"estimation":estimate, "prediction":prediction}
+for i in test.keys():
+    test[i] = test[i].tolist()
+res = {"estimation": estimate, "prediction": prediction, "test": test}
 
-    
 filename = res_file + str(index) + ".txt"
 f = open(filename,"w")
 f.write(json.dumps(res))

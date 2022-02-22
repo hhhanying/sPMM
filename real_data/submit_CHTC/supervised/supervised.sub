@@ -5,9 +5,9 @@ executable=supervised.sh
 transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/configurations/configurations_MOFA.csv,/home/hjiang252/real_data/scripts/MOFA_supervised.py
 
 # requesting resources
-request_memory=13GB
+request_memory=7GB
 request_cpus=1
-request_disk=3GB
+request_disk=70000KB
 
 # parameters
 environment="id=$(Step)"
