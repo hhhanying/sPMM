@@ -1,0 +1,19 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable=supervised_wholeset.sh
+transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/configurations/configurations_MOFA2.csv,/home/hjiang252/real_data/scripts/MOFA_supervised.py
+
+# requesting resources
+request_memory=10GB
+request_cpus=1
+request_disk=100000KB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/real_data/res/supervised/err_$(Process).err
+output= /home/hjiang252/real_data/res/supervised/out_$(Process).out
+log= /home/hjiang252/real_data/res/supervised/log_$(Process).log
+queue 15
