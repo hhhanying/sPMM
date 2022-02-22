@@ -1,0 +1,19 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable=test.sh
+transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/configurations/configurations_MOFA.csv,/home/hjiang252/real_data/scripts/test_with_unsupervised/test_un.py, /home/hjiang252/real_data/res/res.txt
+
+# requesting resources
+request_memory=12GB
+request_cpus=1
+request_disk=1.5GB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/real_data/res/unsupervised/err0221$(Process).err
+output= /home/hjiang252/real_data/res/unsupervised/out0221$(Process).out
+log= /home/hjiang252/real_data/res/unsupervised/log0221$(Process).log
+queue 2
