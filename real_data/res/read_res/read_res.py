@@ -5,7 +5,7 @@ This file is used to read the result.
 All results will be saved in a directory res.
 for k0 in 1:15:
     for method in ["supervised", "unsupervised"]:
-        for no_fold in 1:5:
+        for no_fold in 0:4:
             the result can be obtained by: res[method]["k0"]["no_fold"]
 
 For supervised model, the result will contain:
