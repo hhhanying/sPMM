@@ -33,10 +33,8 @@ res_file = sys.argv[3]
 index = int(sys.argv[4]) + 1
 
 # read configurations
-f = open(confi_file,"r")
-x = f.readlines()
-f.close()
-
+with open(confi_file,"r") as f:
+    x = f.readlines()
 confi = x[index].strip().split(",")
 k0, k1, which_index = [int(i) for i in confi]
 
@@ -46,10 +44,8 @@ alpha_Lambda2, beta_Lambda2, mu_Mu2, sigma2_Mu2 =  3.416767, 11.05094, 0, 0.6660
 alpha_Lambda3, beta_Lambda3, mu_Mu3, sigma2_Mu3 =  0.955197 , 0.4841954, 0, 0.043003
 
 # read data
-f = open(data_file,"r")
-x = f.readlines()
-f.close()
-
+with open(data_file,"r") as f:
+    x = f.readlines()
 X = []
 Y = []
 for i in range(1, len(x)):
@@ -126,7 +122,7 @@ with model_training:
     Tau3_ = Mu3_/S3_  
 
     for i in range(Ntrain):
-        u_ = pm.math.dot(G_[i:(i+1)],T_[Y[i]].T)
+        u_ = pm.math.dot(G_[i:(i+1)],T_[training_Y[i]].T)
 
         Taux1_ = pm.math.dot(u_, Tau1_)
         Lambdax1_ = pm.math.dot(u_, Lambda1_)
@@ -145,7 +141,6 @@ with model_training:
         Sx3_ = 1/Lambdax3_
         Mux3_ = Sx3_*Taux3_
         X3_ = pm.Normal("x_3_"+str(i), mu=Mux3_, sigma=pm.math.sqrt(Sx3_), observed=training_X3[i])
-
 
     trace = pm.sample(ntrace, chains = nchain)
 

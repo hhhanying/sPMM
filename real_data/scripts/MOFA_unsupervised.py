@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import pymc3 as pm
 import theano
-from sklearn.model_selection import KFold
+from sklearn import svm
 from collections import Counter
 from sklearn.model_selection import KFold
 import json
@@ -33,10 +33,8 @@ res_file = sys.argv[3]
 index = int(sys.argv[4]) + 1
 
 # read configurations
-f = open(confi_file,"r")
-x = f.readlines()
-f.close()
-
+with open(confi_file,"r") as f:
+    x = f.readlines()
 confi = x[index].strip().split(",")
 k0, k1, which_index = [int(i) for i in confi]
 
@@ -46,10 +44,8 @@ alpha_Lambda2, beta_Lambda2, mu_Mu2, sigma2_Mu2 =  3.416767, 11.05094, 0, 0.6660
 alpha_Lambda3, beta_Lambda3, mu_Mu3, sigma2_Mu3 =  0.955197 , 0.4841954, 0, 0.043003
 
 # read data
-f = open(data_file,"r")
-x = f.readlines()
-f.close()
-
+with open(data_file,"r") as f:
+    x = f.readlines()
 X = []
 Y = []
 for i in range(1, len(x)):
@@ -143,6 +139,8 @@ estimate = {}
 for para in ["a", 'rho', "U"]+[para+str(i) for para in ["Mu", "Lambda"] for i in range(1,4)]:
     estimate[para] = trace[para][index_save].mean(axis=0)
 
+classifier = svm.SVC(C=2,kernel='rbf', decision_function_shape='ovo') 
+classifier.fit(estimate["U"], training_Y)
 
 # prediction
 a, rho, Mu1_, Lambda1_, Mu2_, Lambda2_, Mu3_, Lambda3_ = estimate["a"], estimate["rho"], estimate["Mu1"], estimate["Lambda1"], estimate["Mu2"], estimate["Lambda2"], estimate["Mu3"], estimate["Lambda3"]
@@ -179,19 +177,7 @@ with model_testing:
 prediction = {}
 
 prediction["U"] = trace["U"][index_save].mean(axis=0)
-
-pre_Y = []
-for i in range(Ntest):
-    y = trace["Y"][index_save,i].tolist()
-    frequency = Counter(y).most_common()
-    possible_prediction = []
-    j = 0
-    while j<len(frequency) and frequency[j][1] == frequency[0][1]:
-        possible_prediction.append(frequency[j][0])
-        j += 1
-    tem_pre = np.random.choice(possible_prediction, 1)[0]
-    pre_Y.append(tem_pre)       
-prediction["Y"] = np.array(pre_Y)  
+prediction["Y"] = classifier.predict(prediction["U"])
 
 accuracy = sum(test_Y == prediction["Y"])/Ntest
 print("accuracy:", accuracy)
