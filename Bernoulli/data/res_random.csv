@@ -1,4 +1,4 @@
-alpha_p, beta_p, d, k0, k1, nlabel, ntrace, nchain, nskip, Ntrain, Ntest, Nfold, a, supervised, unsupervisedsupervised_1, supervised_2, supervised_3, supervised_4, supervised_5, unsupervised_1, unsupervised_2, unsupervised_3, unsupervised_4, unsupervised_5
+alpha_p, beta_p, d, k0, k1, nlabel, ntrace, nchain, nskip, Ntrain, Ntest, Nfold, a, supervised, unsupervised, supervised_1, supervised_2, supervised_3, supervised_4, supervised_5, unsupervised_1, unsupervised_2, unsupervised_3, unsupervised_4, unsupervised_5
 7.96371172851,3.39116341892,150,1,108,2,500,2,2,200,100,5,4.393125059361951,0.49,0.41,0.6,0.325,0.5,0.5,0.425,0.525,0.4,0.5,0.475,0.45
 7.02751106587,7.59937267946,187,2,56,7,500,2,2,200,100,5,25.659290829288768,0.13,0.14,0.1,0.075,0.1,0.125,0.175,0.175,0.2,0.15,0.175,0.2
 5.27312155016,8.39017674967,66,1,29,10,500,2,2,200,100,5,11.168605610512474,0.08,0.13,0.1,0.1,0.125,0.1,0.075,0.1,0.125,0.125,0.125,0.125
