@@ -64,10 +64,10 @@ indexes = [[1, 15, 13, 12,  8, 25, 28, 50, 41, 35, 34, 54],
 [17,  0, 11 , 6 ,29 ,23 ,44 ,39 ,43 ,40, 53],
 [10,  4,  9 , 2 ,26 ,27 ,38 ,36, 32, 42 ,52],
 [5 ,22 ,20, 14 , 7 ,31 ,45, 37, 48, 49, 56],
-list(range(58))]
+list(range(57))]
 test_index = indexes[which_index]
 if which_index == 5:
-    train_index = list(range(58))
+    train_index = list(range(57))
 else:
     train_index = []
     for i in list(range(57)): 

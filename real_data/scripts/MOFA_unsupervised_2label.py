@@ -56,20 +56,22 @@ X = np.array(X)
 Y = np.array(Y)
 
 # Train-Test split
-indexes = [[1, 15, 13, 12,  8, 25, 28, 50, 41, 35, 34, 54],
-[16,  3, 18, 19, 21, 30, 24 ,51, 47, 46, 33, 55],
-[17,  0, 11 , 6 ,29 ,23 ,44 ,39 ,43 ,40, 53],
-[10,  4,  9 , 2 ,26 ,27 ,38 ,36, 32, 42 ,52],
-[5 ,22 ,20, 14 , 7 ,31 ,45, 37, 48, 49, 56],
-list(range(57))]
-test_index = indexes[which_index]
+All_data = list(range(23)) + list(range(32,52)) # the index of sepsis and healthy&no antibiotics
 if which_index == 5:
-    train_index = list(range(57))
+    train_index = test_index = All_data
 else:
+    indexes = [[1, 15, 13, 12,  8, 25, 28, 50, 41, 35, 34, 54],
+    [16,  3, 18, 19, 21, 30, 24 ,51, 47, 46, 33, 55],
+    [17,  0, 11 , 6 ,29 ,23 ,44 ,39 ,43 ,40, 53],
+    [10,  4,  9 , 2 ,26 ,27 ,38 ,36, 32, 42 ,52],
+    [5 ,22 ,20, 14 , 7 ,31 ,45, 37, 48, 49, 56]]
+    test_index = []
     train_index = []
-    for i in list(range(57)): 
-        if i not in set(test_index):
+    for i in All_data: 
+        if i not in set(indexes[which_index]):
             train_index.append(i)
+        else:
+            test_index.append(i)
         
 training_X1, training_X2, training_X3 = X[train_index, 0:180], X[train_index, 180:198], X[train_index, 198:240]
 training_Y = Y[train_index]
@@ -80,7 +82,7 @@ test_Y = Y[test_index]
 ntrace = 2000
 nchain = 2
 nskip = 2
-nlabel = 4
+nlabel = 2
 d = 240
 d1, d2, d3 = 180, 18, 42
 K = ntopic = nlabel*k0+k1

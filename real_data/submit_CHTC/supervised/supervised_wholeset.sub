@@ -13,7 +13,7 @@ request_disk=100000KB
 environment="id=$(Step)"
 
 # log files
-error= /home/hjiang252/real_data/res/supervised/err_$(Process).err
-output= /home/hjiang252/real_data/res/supervised/out_$(Process).out
-log= /home/hjiang252/real_data/res/supervised/log_$(Process).log
-queue 15
+error= /home/hjiang252/real_data/res/supervised/whole/err$(Process).err
+output= /home/hjiang252/real_data/res/supervised/whole/out$(Process).out
+log= /home/hjiang252/real_data/res/supervised/whole/log$(Process).log
+queue 1

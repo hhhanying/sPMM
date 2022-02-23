@@ -1,0 +1,19 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable=supervised_wholeset_2label.sh
+transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/configurations/configurations_MOFA2.csv,/home/hjiang252/real_data/scripts/MOFA_supervised_2label.py
+
+# requesting resources
+request_memory=7GB
+request_cpus=1
+request_disk=70000KB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/real_data/res/two_label/su_whole/err$(Process).err
+output= /home/hjiang252/real_data/res/two_label/su_whole/out$(Process).out
+log= /home/hjiang252/real_data/res/two_label/su_whole/log$(Process).log
+queue 1

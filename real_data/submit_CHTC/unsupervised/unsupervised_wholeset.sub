@@ -2,7 +2,7 @@ universe=docker
 docker_image=hanyingj/pymc3-sklearn
 
 executable=unsupervised_wholeset.sh
-transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/configurations/configurations_MOFA.csv,/home/hjiang252/real_data/scripts/MOFA_unsupervised.py
+transfer_input_files=/home/hjiang252/real_data/data/cleaned_data.csv, /home/hjiang252/real_data/configurations/configurations_MOFA2.csv,/home/hjiang252/real_data/scripts/MOFA_unsupervised.py
 
 # requesting resources
 request_memory=10GB
@@ -13,7 +13,7 @@ request_disk=100000KB
 environment="id=$(Step)"
 
 # log files
-error= /home/hjiang252/real_data/res/unsupervised/err2$(Process).err
-output= /home/hjiang252/real_data/res/unsupervised/out2$(Process).out
-log= /home/hjiang252/real_data/res/unsupervised/log2$(Process).log
-queue 15
+error= /home/hjiang252/real_data/res/unsupervised/whole/err$(Process).err
+output= /home/hjiang252/real_data/res/unsupervised/whole/out$(Process).out
+log= /home/hjiang252/real_data/res/unsupervised/whole/log$(Process).log
+queue 1

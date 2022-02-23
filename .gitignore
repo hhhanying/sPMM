@@ -6,7 +6,7 @@ real_data/test/
 .Rproj
 
 
-real_data/res/model
+
 .Rhistory
 for_pre
 real_data/scripts/su_unsu.py
@@ -19,3 +19,4 @@ real_data/res/submit_CHTC
 real_data/res/supervised
 real_data/res/unsupervised
 real_data/res/two_label/
+real_data/scripts/LASSO.ipynb
