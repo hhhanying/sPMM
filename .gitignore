@@ -10,7 +10,7 @@ real_data/test/
 .Rhistory
 for_pre
 real_data/scripts/su_unsu.py
-analysis/
+analysis2/
 
 real_data/res/simulated
 real_data/res/CV_res

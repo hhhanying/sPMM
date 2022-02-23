@@ -1,0 +1,193 @@
+---
+title: "analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r,echo=FALSE, message = FALSE, warining = FALSE}
+library(data.table)
+library(tidyverse)
+library(purrr)
+library(ggplot2)
+library(ggpubr)
+library(MOFA2)
+library(dplyr)
+```
+
+```{r,echo=FALSE}
+prediction_file = "../res/CV_res/prediction.csv" # where the prediction is saved
+```
+
+### compare the accuracy of supervised vs unsupervised
+```{r,echo=FALSE}
+prediction = read.csv(prediction_file) %>% 
+  mutate(correct = (true == prediction),  true= factor(true), prediction = factor(prediction)) 
+```
+```{r,echo=FALSE, message = FALSE, warining = FALSE}
+prediction %>% group_by(method, k0) %>%
+  summarize(accuracy = mean(correct)) %>% 
+  ggplot(aes(x = k0, y = accuracy, color = method)) +
+  geom_point(size=0.7) +
+  labs(x="k0 (k1=k0)")
+```
+```{r,echo=FALSE, message = FALSE, warining = FALSE}
+prediction %>% group_by(method, k0, true) %>%
+  summarize(accuracy = mean(correct)) %>% 
+  ggplot(aes(x = k0, y = accuracy, color = true)) +
+  geom_point(size=0.7) +
+  labs(x="k0 (k1=k0)") +
+  facet_grid(~method) 
+```
+
+```{r,echo=FALSE, message = FALSE, warining = FALSE}
+prediction %>% group_by(method, k0, prediction) %>%
+  summarize(frequency = length(prediction))%>% 
+  ggplot(aes(x = k0, y = frequency, color = prediction)) +
+  geom_point(size=0.7) +
+  labs(x="k0 (k1=k0)") +
+  facet_grid(~method) 
+```
+
+
+### analyze the memberships
+```{r,echo=FALSE, message = FALSE,warning = FALSE}
+metadata <- fread("ftp://ftp.ebi.ac.uk/pub/databases/mofa/microbiome/metadata.txt.gz")
+metadata = metadata %>% filter(sample!="TKI_F22" & sample != "TKI_F56") %>%
+  select(sample,Age,Sexs,Category)
+```
+```{r,echo = FALSE}
+dat = read.csv("../data/cleaned_data.csv")
+```
+
+```{r,echo=FALSE}
+# choose a result to analyze
+k0 = 10 # 1-15
+G_file = paste("../res/wholeset_res/supervised_",as.character(k0),"_G.txt",sep = "")
+U_file = paste("../res/wholeset_res/unsupervised_",as.character(k0),"_U.txt",sep = "")
+U_su_file = paste("../res/wholeset_res/supervised_",as.character(k0),"_U.txt",sep = "")
+G = read.csv(G_file,header=FALSE)
+U_supervised = read.csv(U_su_file,header=FALSE)
+U = read.csv(U_file,header=FALSE)
+```
+```{r,echo = FALSE}
+G %>%  pivot_longer(everything(), names_to="topic", values_to="membership") %>%
+  ggboxplot(x="topic", y = "membership") +
+   ggtitle("G")
+U %>%  pivot_longer(everything(), names_to="topic", values_to="membership") %>%
+  ggboxplot(x="topic", y = "membership") +
+  ggtitle("U")
+U_supervised %>%  pivot_longer(everything(), names_to="topic", values_to="membership") %>%
+  ggboxplot(x="topic", y = "membership") +
+  ggtitle("U supervised")
+
+```
+
+Select the topics with average membebrship > 1/dim(membership)/5.
+
+```{r,echo = FALSE}
+col_G = c()
+col_U = c()
+col_U_su = c()
+dg = length(G)
+du = length(U)
+k = 5
+for (i in 1:dg){
+  if (mean(G[[i]])>1/dg/k){
+    col_G = c(col_G,i)
+  }
+}
+for (i in 1:du){
+  if (mean(U[[i]])>1/du/k){
+    col_U = c(col_U,i)
+  }
+  if (mean(U_supervised[[i]])>1/du/k){
+    col_U_su = c(col_U_su,i)
+  }
+}
+
+G[col_G] %>% mutate(sample = dat$sample) %>%
+  merge(metadata,by="sample",sort=FALSE)%>% 
+  pivot_longer(starts_with("V") , names_to="topic", values_to="membership") %>%
+  ggboxplot(x="topic", y = "membership", color="Sexs")  +
+  ggtitle("G")
+
+U[col_U] %>% mutate(sample = dat$sample) %>%
+  merge(metadata,by="sample",sort=FALSE)%>% 
+  pivot_longer(starts_with("V") , names_to="topic", values_to="membership") %>%
+  ggboxplot(x="topic", y = "membership", color="Sexs")  +
+  ggtitle("U")
+
+U_supervised[col_U_su]%>% mutate(sample = dat$sample) %>%
+  merge(metadata,by="sample",sort=FALSE)%>% 
+  pivot_longer(starts_with("V") , names_to="topic", values_to="membership") %>%
+  ggboxplot(x="topic", y = "membership", color="Sexs") +
+  ggtitle("U supervised")
+
+```
+
+### simulated result
+
+```{r, echo = FALSE}
+k0 = 10
+dat = read.csv("../data/cleaned_data.csv")
+
+su_file = paste("../res/simulated/supervised_", as.character(k0), ".csv", sep = "")
+un_file = paste("../res/simulated/unsupervised_", as.character(k0), ".csv", sep = "")
+supervised = read.csv(su_file, header = FALSE)
+unsupervised = read.csv(un_file, header = FALSE)
+
+supervised$Category = sapply(supervised$V241, FUN = function(x) dat$Category[x+1])
+unsupervised$Category = sapply(unsupervised$V241, FUN = function(x) dat$Category[x+1])
+supervised$method = "supervised"
+unsupervised$method = "unsupervised"
+d1=rbind(supervised,unsupervised)%>% select(!V241)
+dat1 = dat %>% select(!sample)%>%
+  mutate(method="True_value")
+colnames(dat1)[1:240] = paste("V",1:240, sep="")
+dat1 = rbind(d1,dat1)
+```
+
+```{r, echo = FALSE}
+fea = sample(1:240, 3, replace=F)
+dat2 = dat1[c(fea,241,242)]
+dat2 %>% pivot_longer(starts_with("V"), names_to="feature", values_to = "observation") %>% ggplot(aes(x=observation, color = method)) +
+  geom_density()+
+  facet_grid(Category~feature)
+```
+```{r, echo = FALSE}
+fea = sample(1:240, 3, replace=F)
+dat2 = dat1[c(fea,241,242)]
+dat2 %>% pivot_longer(starts_with("V"), names_to="feature", values_to = "observation") %>% ggplot(aes(x=observation, color = method)) +
+  geom_density()+
+  facet_grid(Category~feature)
+```
+```{r, echo = FALSE}
+fea = sample(1:240, 3, replace=F)
+dat2 = dat1[c(fea,241,242)]
+dat2 %>% pivot_longer(starts_with("V"), names_to="feature", values_to = "observation") %>% ggplot(aes(x=observation, color = method)) +
+  geom_density()+
+  facet_grid(Category~feature)
+```
+```{r, echo = FALSE}
+fea = sample(1:240, 3, replace=F)
+dat2 = dat1[c(fea,241,242)]
+dat2 %>% pivot_longer(starts_with("V"), names_to="feature", values_to = "observation") %>% ggplot(aes(x=observation, color = method)) +
+  geom_density()+
+  facet_grid(Category~feature)
+```
+```{r, echo = FALSE}
+fea = sample(1:240, 3, replace=F)
+dat2 = dat1[c(fea,241,242)]
+dat2 %>% pivot_longer(starts_with("V"), names_to="feature", values_to = "observation") %>% ggplot(aes(x=observation, color = method)) +
+  geom_density()+
+  facet_grid(Category~feature)
+```
+```{r, echo = FALSE}
+fea = sample(1:240, 3, replace=F)
+dat2 = dat1[c(fea,241,242)]
+dat2 %>% pivot_longer(starts_with("V"), names_to="feature", values_to = "observation") %>% ggplot(aes(x=observation, color = method)) +
+  geom_density()+
+  facet_grid(Category~feature)
+```
