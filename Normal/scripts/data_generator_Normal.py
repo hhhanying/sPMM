@@ -26,7 +26,7 @@ def document_generator(a, rho, T, Lambda, Tau, N):
     d = len(Tau[0]) # dim(x)
     
     Y = np.random.choice(list(range(nlabel)), N) # labels
-    G = np.random.dirichlet(a*rho, N)
+    G = np.random.dirichlet(a * rho, N)
     U = np.array([np.dot(T[Y[i]], G[i]) for i in range(N)])
 
     X = np.zeros((N, d))
@@ -35,8 +35,8 @@ def document_generator(a, rho, T, Lambda, Tau, N):
         for j in range(d):
             lambdax = np.dot(u, Lambda[:, j])
             taux = np.dot(u, Tau[:, j])
-            sx = 1/lambdax
-            mux = sx*taux
+            sx = 1 / lambdax
+            mux = sx * taux
             X[i][j] = np.random.normal(mux, np.sqrt(sx))
 
     return X, Y, G, U

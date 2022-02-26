@@ -21,41 +21,41 @@ def train_supervised(X, Y, K, b, alpha, T, mu_Mu, sigma2_Mu, alpha_Lambda, beta_
     G: estimate of memberships of training set
     '''
 
-    N = len(Y)
-    dg = len(alpha)
-    d = len(X[0])
-    T_arr = np.array(T)
+    N = len(Y) # sample size
+    dg = len(alpha) # dim(untransformed membership)
+    d = len(X[0]) # dim(x)
+    T_arr = np.array(T) # nlabel * K * dg
 
     model = pm.Model()
     with model:
-        Lambda_ = pm.Gamma("Lambda", alpha = alpha_Lambda, beta = beta_Lambda, shape = (K, d))
-        Mu_ = pm.Normal("Mu", mu = mu_Mu, sigma = pm.math.sqrt(sigma2_Mu/Lambda_), shape = (K, d))
-        S_ = 1/Lambda_
-        Tau_ = Mu_/S_       
+        Lambda_ = pm.Gamma("Lambda", alpha = alpha_Lambda, beta = beta_Lambda, shape = (K, d)) # notice np.random.gamma require shape and scale
+        Mu_ = pm.Normal("Mu", mu = mu_Mu, sigma = pm.math.sqrt(sigma2_Mu/Lambda_), shape = (K, d)) # notice sigma rather than sigma^2
+        S_ = 1 / Lambda_
+        Tau_ = Mu_ / S_       
 
-        a_ = pm.Exponential("a", b)  
+        a_ = pm.Exponential("a", b)  # mean = 1/b
         rho_ = pm.Dirichlet("rho", a = alpha)
-        G_ = pm.Dirichlet("G", a = a_*rho_, shape = (N, dg))        
+        G_ = pm.Dirichlet("G", a = a_ * rho_, shape = (N, dg))        
         T_ = theano.shared(T_arr)
     
         for i in range(N):
-            u_ = pm.math.dot(G_[i:(i+1)],T_[Y[i]].T)
+            u_ = pm.math.dot(G_[i: (i + 1)], T_[Y[i]].T) # 1 * K
             Taux_ = pm.math.dot(u_, Tau_)
             Lambdax_ = pm.math.dot(u_, Lambda_)
-            Sx_ = 1/Lambdax_
-            Mux_ = Sx_*Taux_
+            Sx_ = 1 / Lambdax_
+            Mux_ = Sx_ * Taux_
 
-            X_ = pm.Normal("x"+str(i), mu=Mux_, sigma=pm.math.sqrt(Sx_), observed=X[i])
+            X_ = pm.Normal("x" + str(i), mu = Mux_, sigma = pm.math.sqrt(Sx_), observed = X[i])
 
         trace = pm.sample(ntrace, chains = nchain)
 
-    nsample = ntrace*nchain
-    nsave = nsample//nskip
-    index_save = [i*nskip-1 for i in range(1,1 + nsave)]
+    nsample = ntrace * nchain
+    nsave = nsample // nskip
+    index_save = [i * nskip - 1 for i in range(1, 1 + nsave)]
     estimate = {}
     
     for para in ["a", 'rho', 'Mu', "Lambda", "G"]:
-        estimate[para] = trace[para][index_save].mean(axis=0)
+        estimate[para] = trace[para][index_save].mean(axis = 0)
     return estimate
 
 def predict_supervised(X, estimate, T, ntrace, nchain, nskip):
@@ -75,45 +75,45 @@ def predict_supervised(X, estimate, T, ntrace, nchain, nskip):
     N = len(X)
     dg = len(T[0][0])
     nlabel = len(T)
-    a, rho, Mu, Lambda = estimate["a"], estimate["rho"], estimate["Mu"], estimate["Lambda"]
-    Tau = Mu*Lambda
+    a, rho, Mu, Lambda = estimate["a"], estimate["rho"], estimate["Mu"], estimate["Lambda"] # extrace estimated parameters
+    Tau = Mu * Lambda
     T_arr = np.array(T)
     
     model = pm.Model()
     with model:
-        G_ = pm.Dirichlet("G", a = a*rho, shape = (N, dg))
-        Y_ = pm.Categorical("Y", p=np.ones(nlabel)/nlabel, shape = N)    
+        G_ = pm.Dirichlet("G", a = a * rho, shape = (N, dg))
+        Y_ = pm.Categorical("Y", p = np.ones(nlabel) / nlabel, shape = N)    
         T_ = theano.shared(T_arr)
         
         for i in range(N):
             t_ = T_[Y_[i]]
-            u_ = pm.math.dot(G_[i:(i+1)],t_.T)
+            u_ = pm.math.dot(G_[i: (i + 1)], t_.T)
             Taux_ = pm.math.dot(u_, Tau)
             Lambdax_ = pm.math.dot(u_, Lambda)
-            Sx_ = 1/Lambdax_
-            Mux_ = Sx_*Taux_
+            Sx_ = 1 / Lambdax_
+            Mux_ = Sx_ * Taux_
             
-            X_ = pm.Normal("x"+str(i), mu=Mux_, sigma=pm.math.sqrt(Sx_), observed=X[i])
+            X_ = pm.Normal("x" + str(i), mu = Mux_, sigma = pm.math.sqrt(Sx_), observed = X[i])
             
         trace = pm.sample(ntrace, chains = nchain) 
 
-    nsample = ntrace*nchain
-    nsave = nsample//nskip
-    index_save = [i*nskip-1 for i in range(1,1 + nsave)]
-    prediction = {}
+    nsample = ntrace * nchain
+    nsave = nsample // nskip
+    index_save = [i * nskip - 1 for i in range(1, 1 + nsave)]
+    estimate = {}
 
-    prediction["G"] = trace["G"][index_save].mean(axis=0)
+    prediction["G"] = trace["G"][index_save].mean(axis = 0)
     
     pre_Y = []
     for i in range(N):
-        y = trace["Y"][index_save,i].tolist()
-        frequency = Counter(y).most_common()
-        possible_prediction = []
+        y = trace["Y"][index_save, i].tolist() # saved prediction for ith subject
+        frequency = Counter(y).most_common() # the labels and their frequencies sorted by frequency
+        possible_prediction = [] # used to save the most common labels
         j = 0
-        while j<len(frequency) and frequency[j][1] == frequency[0][1]:
+        while j < len(frequency) and frequency[j][1] == frequency[0][1]:
             possible_prediction.append(frequency[j][0])
             j += 1
-        tem_pre = np.random.choice(possible_prediction, 1)[0]
+        tem_pre = np.random.choice(possible_prediction, 1)[0] # break the tie randomly
         pre_Y.append(tem_pre)       
     prediction["Y"] = np.array(pre_Y)  
     
@@ -142,7 +142,10 @@ def CV_supervised_Normal(X, Y, Nfold, T, mu_Mu, sigma2_Mu, alpha_Lambda, beta_La
     for train_index, test_index in kf.split(X):
         tem_accuracy, tem_estimation = accuracy_supervised_Normal(X[train_index], Y[train_index], X[test_index], Y[test_index], T, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, K, b, alpha, ntrace, nchain, nskip)
         res.append(tem_accuracy)
+
+        # save the best accuracy it achieved and the corresponding model
         if tem_accuracy > best_accuracy:
             best_accuracy = tem_accuracy
             best_estimation = tem_estimation
+            
     return res, best_estimation 
