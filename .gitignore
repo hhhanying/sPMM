@@ -20,3 +20,5 @@ real_data/res/supervised
 real_data/res/unsupervised
 real_data/res/two_label/
 real_data/scripts/LASSO.ipynb
+
+test_new_set

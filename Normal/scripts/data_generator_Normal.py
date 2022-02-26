@@ -7,11 +7,13 @@ def document_generator(a, rho, T, Lambda, Tau, N):
     Lambda, Tau: topics. K*d matrix. Lambda are positive.
     N: the number of documents.
     
-    Lambda = 1/sigma
-    Tau = mu/sigma
+    Lambda = 1/sigma^2
+    Tau = mu/sigma^2
     or
     sigma = 1/Lambda
     mu = Tau/Lambda
+
+    x|u ~ normal(lambda_x, tau_x), where lambda_x = sum(u_i * lambda_i) and tau_x = sum(u_i * tau_i)
     
     output: 
     X: N*d, X[i] = document[i]
