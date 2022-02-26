@@ -35,18 +35,17 @@ confi_file = sys.argv[2]
 res_file = sys.argv[3]
 
 # read parameters
-f = open(confi_file,"r")
-x = f.readlines()
-f.close()
+with open(confi_file, "r") as f:
+    x = f.readlines()
 
 index = int(sys.argv[1]) + 1 # 1st line is header
 res = x[index].strip()
 para = res.split(",")
-mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda = [float(i) for i in para[:4]]
+mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda = [float(i) for i in para[: 4]]
 d, k0, k1, nlabel, ntrace, nchain, nskip, Ntrain, Ntest, Nfold = [int(i) for i in para[4:]]
 
 dg = k0 + k1 
-K = ntopic = nlabel*k0+k1
+K = ntopic = nlabel * k0 + k1
 
 alpha = np.ones(dg)
 b = 0.1
@@ -55,18 +54,18 @@ b = 0.1
 T = []
 for i in range(nlabel):
     tem = np.block([
-        [np.zeros((k0*i,k0+k1))],
+        [np.zeros((k0 * i, k0 + k1))],
         [np.eye(k0), np.zeros((k0, k1))],
-        [np.zeros((k0*(nlabel-i-1),k0+k1))],
-        [np.zeros((k1,k0)), np.eye(k1)]
+        [np.zeros((k0 * (nlabel - i - 1), k0 + k1))],
+        [np.zeros((k1, k0)), np.eye(k1)]
     ])
     T.append(tem)
 
 # draw corpus-level parameters
 rho = np.random.dirichlet(alpha, 1)[0]
-a = np.random.exponential(1/b,1)[0]
-Lambda = np.random.gamma(shape = alpha_Lambda, scale = 1/beta_Lambda, size = (K,d))
-Mu = np.random.normal(mu_Mu, np.sqrt(sigma2_Mu/Lambda), (K,d))
+a = np.random.exponential(1 / b, 1)[0]
+Lambda = np.random.gamma(shape = alpha_Lambda, scale = 1 / beta_Lambda, size = (K, d))
+Mu = np.random.normal(mu_Mu, np.sqrt(sigma2_Mu / Lambda), (K, d))
 Tau = Mu * Lambda
 
 print("the value of a:", a)
