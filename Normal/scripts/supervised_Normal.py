@@ -29,7 +29,7 @@ def train_supervised(X, Y, K, b, alpha, T, mu_Mu, sigma2_Mu, alpha_Lambda, beta_
     model = pm.Model()
     with model:
         Lambda_ = pm.Gamma("Lambda", alpha = alpha_Lambda, beta = beta_Lambda, shape = (K, d)) # notice np.random.gamma require shape and scale
-        Mu_ = pm.Normal("Mu", mu = mu_Mu, sigma = pm.math.sqrt(sigma2_Mu/Lambda_), shape = (K, d)) # notice sigma rather than sigma^2
+        Mu_ = pm.Normal("Mu", mu = mu_Mu, sigma = pm.math.sqrt(sigma2_Mu / Lambda_), shape = (K, d)) # notice sigma rather than sigma^2
         S_ = 1 / Lambda_
         Tau_ = Mu_ / S_       
 

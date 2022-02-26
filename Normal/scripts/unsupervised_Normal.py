@@ -29,34 +29,34 @@ def train_unsupervised(X, Y, K, b, alpha, mu_Mu, sigma2_Mu, alpha_Lambda, beta_L
     with model:
         # topics
         Lambda_ = pm.Gamma("Lambda", alpha = alpha_Lambda, beta = beta_Lambda, shape = (K, d))
-        Mu_ = pm.Normal("Mu", mu = mu_Mu, sigma = pm.math.sqrt(sigma2_Mu/Lambda_), shape = (K, d))
-        S_ = 1/Lambda_
-        Tau_ = Mu_/S_       
+        Mu_ = pm.Normal("Mu", mu = mu_Mu, sigma = pm.math.sqrt(sigma2_Mu / Lambda_), shape = (K, d))
+        S_ = 1 / Lambda_
+        Tau_ = Mu_ / S_       
         # corpus-level parameters
         a_ = pm.Exponential("a", b)  
         rho_ = pm.Dirichlet("rho", a = alpha)
         # membership
-        U_ = pm.Dirichlet("U", a=a_*rho_, shape = (N, K))
+        U_ = pm.Dirichlet("U", a = a_ * rho_, shape = (N, K))
     
         for i in range(N):
-            u_ = U_[i:(i+1)]
+            u_ = U_[i: (i + 1)]
             Taux_ = pm.math.dot(u_, Tau_)
             Lambdax_ = pm.math.dot(u_, Lambda_)
-            Sx_ = 1/Lambdax_
-            Mux_ = Sx_*Taux_
-            X_ = pm.Normal("x"+str(i), mu=Mux_, sigma=pm.math.sqrt(Sx_), observed=X[i])
+            Sx_ = 1 / Lambdax_
+            Mux_ = Sx_ * Taux_
+            X_ = pm.Normal("x" + str(i), mu = Mux_, sigma = pm.math.sqrt(Sx_), observed = X[i])
             
         trace = pm.sample(ntrace, chains = nchain)
 
-    nsample = ntrace*nchain
-    nsave = nsample//nskip
-    index_save = [i*nskip-1 for i in range(1,1 + nsave)]
-    estimate = {}         
+    nsample = ntrace * nchain
+    nsave = nsample // nskip
+    index_save = [i * nskip - 1 for i in range(1, 1 + nsave)]
+    estimate = {}      
     
     for para in ["a", 'rho', 'Mu', "Lambda", "U"]:
-        estimate[para] = trace[para][index_save].mean(axis=0)
+        estimate[para] = trace[para][index_save].mean(axis = 0)
         
-    classifier = svm.SVC(C=2,kernel='rbf', decision_function_shape='ovo') 
+    classifier = svm.SVC(C = 2,kernel = 'rbf', decision_function_shape = 'ovo') 
     classifier.fit(estimate["U"], Y)
         
     return estimate, classifier   
@@ -74,31 +74,31 @@ def predict_unsupervised(X, estimate, classifier, ntrace, nchain, nskip):
     '''
     
     N = len(X)
-    a, rho, Mu, Lambda = estimate["a"], estimate["rho"], estimate["Mu"], estimate["Lambda"]
-    Tau = Mu*Lambda
+    a, rho, Mu, Lambda = estimate["a"], estimate["rho"], estimate["Mu"], estimate["Lambda"] # extrace estimated parameters
+    Tau = Mu * Lambda
     K = len(Tau)
 
     model = pm.Model()
     with model:
-        U_ = pm.Dirichlet("U", a=a*rho, shape = (N, K))
+        U_ = pm.Dirichlet("U", a = a * rho, shape = (N, K))
         for i in range(N):
-            u_ = U_[i:(i+1)] 
+            u_ = U_[i: (i + 1)] 
             Taux_ = pm.math.dot(u_, Tau)
             Lambdax_ = pm.math.dot(u_, Lambda)
-            Sx_ = 1/Lambdax_
-            Mux_ = Sx_*Taux_
+            Sx_ = 1 / Lambdax_
+            Mux_ = Sx_ * Taux_
             
-            X_ = pm.Normal("x"+str(i), mu=Mux_, sigma=pm.math.sqrt(Sx_), observed=X[i])    
+            X_ = pm.Normal("x" + str(i), mu = Mux_, sigma = pm.math.sqrt(Sx_), observed = X[i])    
             
         trace = pm.sample(ntrace, chains = nchain) 
         
-    nsample = ntrace*nchain
-    nsave = nsample//nskip
-    index_save = [i*nskip-1 for i in range(1,1 + nsave)]    
-    prediction = {}
+    nsample = ntrace * nchain
+    nsave = nsample // nskip
+    index_save = [i * nskip - 1 for i in range(1, 1 + nsave)]
+    estimate = {}  
     
     for i in ["U"]:
-        prediction[i] = trace[i][index_save].mean(axis=0) 
+        prediction[i] = trace[i][index_save].mean(axis = 0) 
     prediction["Y"] = classifier.predict(prediction["U"])
      
     return prediction
@@ -127,9 +127,10 @@ def CV_unsupervised_Normal(X, Y, Nfold, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lam
         tem_accuracy, tem_estimation, tem_classifier = accuracy_unsupervised_Normal(X[train_index], Y[train_index], X[test_index], Y[test_index], mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, K, b, alpha, ntrace, nchain, nskip)
         res.append(tem_accuracy)
         
+        # save the best accuracy it achieved and the corresponding model and classifier
         if tem_accuracy > best_accuracy:
             best_accuracy = tem_accuracy
             best_estimation = tem_estimation
             best_classifier = tem_classifier
+
     return res, best_estimation, best_classifier
- 
