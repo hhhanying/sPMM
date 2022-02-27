@@ -17,16 +17,16 @@ from unsupervised_Normal import predict_unsupervised
 confi_index = int(sys.argv[1]) + 1 # 1st line is header, 1-81
 confi_file = sys.argv[2] # name of configuration file
 res_file = sys.argv[3] # result will be saved in res_file.format(str(set_index), method, train_test)
-method = int(sys.argv[5])
+method = sys.argv[5]
 train_test = sys.argv[6]
-
+confi_index = 80 # to see the largest memory and disk
 # read configuration
 with open(confi_file, "r") as f:
     x = f.readlines()
 res = x[confi_index].strip()
 para = res.split(",")
 # mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda = [float(i) for i in para[: 4]] # not needed
-set_index, d, k0, k1, nlabel, ntrace, nchain, nskip, Ntrain, Ntest = [int(i) for i in para[4:]]
+set_index, d, k0, k1, nlabel, ntrace, nchain, nskip, Ntrain, Ntest = [int(i) for i in para]
 data_file = sys.argv[4].format(str(set_index))
 
 # read model
@@ -35,8 +35,8 @@ with open(data_file, "r") as f:
 dat = json.loads(x)
 
 estimate = dat["model"]
-X = dat[sys.argv[6]]["X"]
-Y = dat[sys.argv[6]]["Y"]
+X = np.array(dat[train_test]["X"])
+Y = np.array(dat[train_test]["Y"])
 
 if method == "supervised":
     # define T
