@@ -6,7 +6,7 @@ transfer_input_files=/home/hjiang252/Normal/configurations/configurations_member
 
 
 # requesting resources
-request_memory=15GB
+request_memory=10GB
 request_cpus=1
 request_disk=1.5GB
 
