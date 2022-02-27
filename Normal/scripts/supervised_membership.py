@@ -46,7 +46,10 @@ for i in range(nlabel):
 
 estimation = train_supervised(training_X, training_Y, K, b, alpha, T, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, ntrace, nchain, nskip)
 supervised_prediction = predict_supervised(test_X, estimation, T, ntrace, nchain, nskip)
+rho1 = estimation["rho"]
+estimation["rho"] = np.ones(K)
 unsupervised_prediction = predict_unsupervised(test_X, estimation, None, ntrace, nchain, nskip) # only contain U
+estimation["rho"] = rho1
 
 def dir_to_list(x):
     # x is a directory, which only contains np array or const
