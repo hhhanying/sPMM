@@ -99,6 +99,10 @@ def predict_unsupervised(X, estimate, classifier, ntrace, nchain, nskip):
     
     for i in ["U"]:
         prediction[i] = trace[i][index_save].mean(axis = 0) 
+
+    if classifier == None:
+        return prediction
+
     prediction["Y"] = classifier.predict(prediction["U"])
      
     return prediction
