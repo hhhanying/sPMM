@@ -19,7 +19,7 @@ confi_file = sys.argv[2] # name of configuration file
 res_file = sys.argv[3] # result will be saved in res_file.format(str(set_index), method, train_test)
 method = sys.argv[5]
 train_test = sys.argv[6]
-confi_index = 80 # to see the largest memory and disk
+
 # read configuration
 with open(confi_file, "r") as f:
     x = f.readlines()
@@ -64,7 +64,7 @@ for i in prediction.keys():
         prediction[i] = prediction[i].tolist()    
 
 
-with open(res_file.format(str(set_index), method, train_test), "w"):
+with open(res_file.format(str(set_index), method, train_test), "w") as f:
     f.write(json.dumps(prediction))
 
 
