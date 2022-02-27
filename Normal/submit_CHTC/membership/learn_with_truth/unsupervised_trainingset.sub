@@ -1,0 +1,20 @@
+universe=docker
+docker_image=hanyingj/pymc3-sklearn
+
+executable = unsupervised_trainingset.sh
+transfer_input_files=/home/hjiang252/Normal/configurations/configurations_membership_dataset.csv, /home/hjiang252/Normal/dataset, /home/hjiang252/Normal/scripts/membership_with_true_parameter.py, /home/hjiang252/Normal/scripts/supervised_Normal.py, /home/hjiang252/Normal/scripts/unsupervised_Normal.py
+
+
+# requesting resources
+request_memory=15GB
+request_cpus=1
+request_disk=1.5GB
+
+# parameters
+environment="id=$(Step)"
+
+# log files
+error= /home/hjiang252/Normal/res/true3/err$(Process).err
+output= /home/hjiang252/Normal/res/true3/out$(Process).out
+log= /home/hjiang252/Normal/res/true3/log$(Process).log
+queue 1
