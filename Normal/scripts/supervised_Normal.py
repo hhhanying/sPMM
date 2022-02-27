@@ -100,7 +100,7 @@ def predict_supervised(X, estimate, T, ntrace, nchain, nskip):
     nsample = ntrace * nchain
     nsave = nsample // nskip
     index_save = [i * nskip - 1 for i in range(1, 1 + nsave)]
-    estimate = {}
+    prediction = {}
 
     prediction["G"] = trace["G"][index_save].mean(axis = 0)
     

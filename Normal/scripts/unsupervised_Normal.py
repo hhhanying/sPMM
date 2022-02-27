@@ -95,7 +95,7 @@ def predict_unsupervised(X, estimate, classifier, ntrace, nchain, nskip):
     nsample = ntrace * nchain
     nsave = nsample // nskip
     index_save = [i * nskip - 1 for i in range(1, 1 + nsave)]
-    estimate = {}  
+    prediction = {}  
     
     for i in ["U"]:
         prediction[i] = trace[i][index_save].mean(axis = 0) 
