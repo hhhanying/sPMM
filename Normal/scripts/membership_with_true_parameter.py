@@ -35,6 +35,8 @@ with open(data_file, "r") as f:
 dat = json.loads(x)
 
 estimate = dat["model"]
+for i in ["rho", "Lambda", "Mu"]:
+    estimate[i] = np.array(estimate[i])
 X = np.array(dat[train_test]["X"])
 Y = np.array(dat[train_test]["Y"])
 
