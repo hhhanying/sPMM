@@ -1,6 +1,6 @@
 import numpy as np
 
-def document_generator(a, rho, T, Lambda, Tau, N):
+def document_generator(a, rho, T, Lambda, Tau, N, nrare = 0, rare_rate = 0, prob_rate = 0):
     '''
     a, rho: corpus-level parameters
     T: transformation matrix. ntopic * K * dg
@@ -26,6 +26,14 @@ def document_generator(a, rho, T, Lambda, Tau, N):
     d = len(Tau[0]) # dim(x)
     
     Y = np.random.choice(list(range(nlabel)), N) # labels
+
+    if prob_rate: # if we want an unbalanced dataset
+        if rare_rate:
+            nrare = int(nlabel * rare_rate)
+        p = np.array([prob_rate] * nrare + [1] * (nlabel - nrare))
+        p = p/p.sum()
+        Y = np.random.choice(list(range(nlabel)), N, p = p) # labels
+        
     G = np.random.dirichlet(a * rho, N)
     U = np.array([np.dot(T[Y[i]], G[i]) for i in range(N)])
 
