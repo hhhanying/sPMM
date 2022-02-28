@@ -4,6 +4,7 @@ input:
 1. index of configuration: 0 to 80
 2. name of configuration file
 3. name to save result
+4. name of data file, sys.argv[4].format(str(set_index))
 5. method: supervised, unsupervised
 6. dataset: training_set, test_set
 '''
@@ -66,7 +67,4 @@ for i in prediction.keys():
 
 with open(res_file.format(str(set_index), method, train_test), "w") as f:
     f.write(json.dumps(prediction))
-
-
-
 
