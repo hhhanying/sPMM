@@ -16,35 +16,43 @@ library(MOFA2)
 library(dplyr)
 ```
 
-```{r,echo=FALSE}
-# choose a result to analyze
-k0 = 10 # 1-15
-```
-
 ```{r,echo = FALSE}
 dat = read.csv("../data/cleaned_data.csv")
 ```
 
-```{r,echo=FALSE}
-
-U_su_file = paste("../res/wholeset_res/supervised_",as.character(k0),"_U.txt",sep = "")
-
-U_supervised = read.csv(U_su_file,header=FALSE)
-
+```{r, echo = FALSE}
+#########################################
+# row 1-23: 0(Sepsis)                   #
+# row 24-32: 1(Non septic ICU)          #
+# row 33-52: 2(Healthy, no antibiotics) #
+# row 53-57: 3(Healthy, antibiotics)    #
+#########################################
 ```
 
-```{r}
-for (i in 0:4){
-  start = i*k0 + 1
-
-  p = U_supervised[start: (start + k0 - 1)]%>% 
-    mutate(Category = factor(dat$Category)) %>%
-    pivot_longer(starts_with("V") , names_to="topic", values_to="membership") %>%
-    ggboxplot(x="topic", y = "membership", color="Category") +
-    ggtitle(paste("U supervised for ", as.character(i), "th group of topics", sep = '')) 
-  print(p)
+```{r,echo=FALSE}
+for (k0 in 1:15){
+  print(paste("k0 =", k0))
+  U_su_file = paste("../res/wholeset_res/supervised_",as.character(k0),"_U.txt",sep = "")
+  U_supervised = read.csv(U_su_file,header=FALSE)
+  
+  ps = list()
+  
+  for (i in 0:4){
+    start = i*k0 + 1
+  
+    p = U_supervised[start: (start + k0 - 1)]%>% 
+      mutate(Category = factor(dat$Category)) %>%
+      pivot_longer(starts_with("V") , names_to="topic", values_to="membership") %>%
+      ggboxplot(x="topic", y = "membership", color="Category") +
+      ggtitle(paste("U supervised for ", as.character(i), "th group of topics, k0 = ", k0, sep = '')) 
+    
+    ps[[i+1]] = p
+  } 
+  print(ggarrange(ps[[1]], ps[[2]], ps[[3]], ps[[4]], ps[[5]], ncol = 2, nrow = 3))
+  print(paste(rep("_", 100), collapse = ""))
 }
 ```
+
 
 
 
