@@ -19,6 +19,12 @@ library(dplyr)
 ```{r,echo = FALSE}
 dat = read.csv("../data/cleaned_data.csv")
 ```
+```{r,echo=FALSE}
+prediction_file = "../res/CV_res/prediction.csv" # where the prediction is saved
+
+prediction = read.csv(prediction_file) %>% 
+  mutate(correct = (true == prediction),  true= factor(true), prediction = factor(prediction)) 
+```
 
 ```{r, echo = FALSE}
 #########################################
@@ -29,11 +35,13 @@ dat = read.csv("../data/cleaned_data.csv")
 #########################################
 ```
 
-```{r,echo=FALSE}
+```{r,echo=FALSE, warning = FALSE}
 for (k0 in 1:15){
   print(paste("k0 =", k0))
   U_su_file = paste("../res/wholeset_res/supervised_",as.character(k0),"_U.txt",sep = "")
   U_supervised = read.csv(U_su_file,header=FALSE)
+  G_file = paste("../res/wholeset_res/supervised_",as.character(k0),"_G.txt",sep = "")
+  G = read.csv(G_file,header=FALSE)
   
   ps = list()
   
@@ -44,16 +52,48 @@ for (k0 in 1:15){
       mutate(Category = factor(dat$Category)) %>%
       pivot_longer(starts_with("V") , names_to="topic", values_to="membership") %>%
       ggboxplot(x="topic", y = "membership", color="Category") +
-      ggtitle(paste("U supervised for ", as.character(i), "th group of topics, k0 = ", k0, sep = '')) 
+      ggtitle(paste("U_sup for ", as.character(i), "th grp of topics", sep = '')) 
     
     ps[[i+1]] = p
   } 
   print(ggarrange(ps[[1]], ps[[2]], ps[[3]], ps[[4]], ps[[5]], ncol = 2, nrow = 3))
+  
+  U_su_2 = U_supervised[1: (4 * k0)] %>%
+    mutate(Category = dat$Category) %>%
+    mutate(idx = 1: nrow(U_supervised)) %>%
+    pivot_longer(starts_with("V") , names_to="topic", values_to="membership_supervised") 
+  U_su_2 = U_su_2 %>%  
+    mutate(topic = as.integer(substr(U_su_2$topic, 2,10))) %>%
+    filter(topic > Category * k0 & topic <= Category * k0 + k0)
+  G = G[1: k0] %>%
+    mutate(Category = dat$Category) %>%
+    mutate(idx = 1: nrow(U_supervised)) %>%
+    pivot_longer(starts_with("V") , names_to="topic", values_to="membership_unsupervised") 
+  G = G %>%  
+    mutate(topic = as.integer(substr(G$topic, 2,10))) %>%
+    mutate(topic = topic + Category * k0) %>% 
+    select(!Category)
+  
+  tem = merge(G, U_su_2, by = c("idx", "topic")) %>% mutate(Category = factor(Category))
+  p = tem %>% ggplot(aes(x = membership_supervised, y = membership_unsupervised, group=topic, color = Category)) +
+    geom_line() +
+    geom_point() +
+    ggtitle("membership of class-specific topics under different models")
+  print(p)
+  
+  k = k0
+  p_accu = prediction %>% 
+    filter(k0 == k)  %>% 
+    group_by(method, true) %>%
+    summarize(accuracy = mean(correct)) %>% 
+    mutate(Category = true) %>%
+    ggplot(aes(x = Category, y = accuracy, color = method)) +
+    geom_point(size=1.2) +
+    ggtitle("accuracy vs. Category")
+  print(p_accu)
+
   print(paste(rep("_", 100), collapse = ""))
 }
 ```
-
-
-
 
 
