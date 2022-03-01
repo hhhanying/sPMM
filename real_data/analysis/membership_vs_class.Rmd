@@ -1,0 +1,51 @@
+---
+title: "membership_vs_class"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r,echo=FALSE, message = FALSE, warining = FALSE}
+library(data.table)
+library(tidyverse)
+library(purrr)
+library(ggplot2)
+library(ggpubr)
+library(MOFA2)
+library(dplyr)
+```
+
+```{r,echo=FALSE}
+# choose a result to analyze
+k0 = 10 # 1-15
+```
+
+```{r,echo = FALSE}
+dat = read.csv("../data/cleaned_data.csv")
+```
+
+```{r,echo=FALSE}
+
+U_su_file = paste("../res/wholeset_res/supervised_",as.character(k0),"_U.txt",sep = "")
+
+U_supervised = read.csv(U_su_file,header=FALSE)
+
+```
+
+```{r}
+for (i in 0:4){
+  start = i*k0 + 1
+
+  p = U_supervised[start: (start + k0 - 1)]%>% 
+    mutate(Category = factor(dat$Category)) %>%
+    pivot_longer(starts_with("V") , names_to="topic", values_to="membership") %>%
+    ggboxplot(x="topic", y = "membership", color="Category") +
+    ggtitle(paste("U supervised for ", as.character(i), "th group of topics", sep = '')) 
+  print(p)
+}
+```
+
+
+
+
