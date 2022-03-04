@@ -1,6 +1,7 @@
 Bernoulli/res/
 Normal/res/
 Normal/dataset/
+Normal/membership_analysis/res
 .Rproj.user
 **/.DS_Store
 real_data/test/
