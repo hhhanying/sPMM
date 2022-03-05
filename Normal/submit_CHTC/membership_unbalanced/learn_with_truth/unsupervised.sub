@@ -6,9 +6,9 @@ transfer_input_files=/home/hjiang252/Normal/configurations/configurations_member
 
 
 # requesting resources
-request_memory=4GB
+request_memory=4.5GB
 request_cpus=1
-request_disk=0.6GB
+request_disk=0.4GB
 
 # parameters
 environment="id=$(Step)"
@@ -17,4 +17,4 @@ environment="id=$(Step)"
 error= /home/hjiang252/Normal/res/true2/unb$(Process).err
 output= /home/hjiang252/Normal/res/true2/unb$(Process).out
 log= /home/hjiang252/Normal/res/true2/unb$(Process).log
-queue 3
+queue 81

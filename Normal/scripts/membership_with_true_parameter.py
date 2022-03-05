@@ -27,7 +27,6 @@ with open(confi_file, "r") as f:
     x = f.readlines()
 res = x[confi_index].strip()
 para = res.split(",")
-# mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda = [float(i) for i in para[: 4]] # not needed
 set_index, d, k0, k1, nlabel, ntrace, nchain, nskip, Ntrain, Ntest = [int(i) for i in para]
 data_file = data_file.format(str(set_index))
 
@@ -39,11 +38,6 @@ dat = json.loads(x)
 estimate = dat["model"]
 for i in ["rho", "Lambda", "Mu"]:
     estimate[i] = np.array(estimate[i])
-
-# X = np.array(dat[train_test]["X"])
-# Y = np.array(dat[train_test]["Y"])
-
-print("check 1")  # will be deleted
 
 if method == "supervised":
     X = np.array(dat["test_set"]["X"])
@@ -67,28 +61,6 @@ if method == "unsupervised":
     estimate["rho"] = np.ones(K)
     prediction = predict_unsupervised(X, estimate, None, ntrace, nchain, nskip)
     
-print("check 2") # will be deleted
-
-try:  # will be deleted
-    print("check 3")  # will be deleted
-    for i in prediction.keys():
-        np.savetxt("{}_{}.csv".format(i, set_index), prediction[i], delimiter=',', header='', fmt="%.5f")
-        print(i)  # will be deleted
-    print("check 3 finish")
-except:
-    print("check 3 fail") 
-
-try:  # this section will will be deleted       
-    print("check 4")  # will be deleted
-    for i in prediction.keys():
-        if type(prediction[i]) is type(np.array([1])):
-            prediction[i] = prediction[i].tolist()    
-    print("check 4 finish")
-except:
-    print("check 4 fail") 
-
-with open(res_file.format(str(set_index), method), "w") as f:
-    f.write(json.dumps(prediction))
-    print(json.dumps(prediction))
-print("finished")
+for i in prediction.keys():
+    np.savetxt("{}_{}.csv".format(i, set_index), prediction[i], delimiter=',', header='', fmt="%.5f")
 
