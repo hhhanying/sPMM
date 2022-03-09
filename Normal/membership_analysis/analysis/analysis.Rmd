@@ -70,9 +70,38 @@ accuracy %>%
 Observation: 
  - Overall, the test accuracy is closed to the accuracy when we know the true topics. That means our training process is correct and the low accuracy is not caused by computation.
 
+```{r}
+accuracy %>% filter(set_index == 32 & setting == 'training') %>% 
+  ggplot(aes(x = k0, y = accu, color = method)) + geom_point() + facet_grid(.~set_type)
+```
 
 
+```{r}
+temp2 = accuracy %>%
+  filter(setting == 'training') %>%
+  filter(truek0 == truek1 & k0 == k1) %>%
+  filter(truek0 == k0 & truek1 == k1)
 
+for (d0 in c(20, 50, 100)){
+  p = accuracy %>%
+    filter(setting == 'training') %>%
+    filter(truek0 == truek1 & k0 == k1) %>%
+    filter(d == d0) %>%
+    ggplot(aes(x = k0, y = accu, color = method, group = interaction(method,set_index))) + 
+    geom_path() + 
+    facet_grid(method ~ set_type) +
+    geom_point(data = temp2 %>% filter(d == d0), aes(x = k0, y = accu, color = 'red')) + 
+    ggtitle(paste0("d = ", d0))
+  print(p)
+}
+
+
+```
+
+Observations:
+ - Supervised model is robust to misspecified topic numbers.
+ - For unsupervised model, it's even better to train it with # topics smaller than the true parameters.
+ - Overall, high dimension will improve the accuracy.
 
 
 
