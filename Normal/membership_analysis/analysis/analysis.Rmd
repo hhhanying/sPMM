@@ -1,0 +1,83 @@
+---
+title: "analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, warning = FALSE}
+library(tidyverse)
+```
+```{r}
+confi = "../../configurations/configurations_membership_dataset.csv"
+confi = read.csv(confi)
+```
+
+```{r}
+accuracy = data.frame(matrix(nrow = 0, ncol = 7))
+
+for (set_index in 1:81){
+  for (set_type in c('balanced', 'unbalanced')){
+    res_path = paste0('../res/', set_type, '_', set_index, '/')
+    # read true Y
+    Y = paste0(res_path, 'data/test_set/Y.csv') %>% read.csv(header = FALSE) 
+    Ntest = dim(Y)[1]
+    truek0 = confi$k0[set_index]
+    truek1 = confi$k1[set_index]
+    
+    # learn with true topics
+    if (file.exists(paste0(res_path, 'true/Y_', set_index, '.csv'))){
+      temY = paste0(res_path, 'true/Y_', set_index, '.csv') %>% read.csv(header = FALSE)
+      accu = sum(temY == Y) / Ntest
+      accuracy = rbind(accuracy, data.frame(set_index, set_type, accu, setting = 'truth', k0 = truek0, k1 = truek1, method = 'supervised'))
+    }
+    if (file.exists(paste0(res_path, 'true/Y_un.csv'))){
+      temY = paste0(res_path, 'true/Y_un.csv') %>% read.csv(header = FALSE) 
+      accu = sum(temY == Y) / Ntest
+      accuracy = rbind(accuracy, data.frame(set_index, set_type, accu, setting = 'truth', k0 = truek0, k1 = truek1, method = 'unsupervised'))
+    }
+    
+    for (k0s in c(2, 5, 10)){
+      for (k1s in c(2, 5, 10)){
+        for (meth in c('supervised', 'unsupervised')){
+          tem1 = paste0(res_path, meth, '_', k0s, '_', k1s)
+          if (tem1 %>% dir.exists()){
+            temY = paste0(tem1, '/Y.csv') %>% read.csv(header = FALSE)
+            accu = sum(temY == Y) / Ntest
+            accuracy = rbind(accuracy, data.frame(set_index, set_type, accu, setting = 'training', k0 = k0s, k1 = k1s, method = meth))
+          }
+        }
+      }
+    }    
+  }
+}
+```
+
+```{r}
+accuracy = confi %>% 
+  select(set_index, k0, k1, nlabel, d) %>%
+  rename(truek0 = k0, truek1 = k1) %>%
+  merge(accuracy, by = "set_index") 
+```
+
+```{r}
+accuracy %>%
+  filter(k0 == truek0 & k1 == truek1 & d == 50) %>%
+  ggplot(aes(x = factor(set_index), y = accu, color = setting)) + geom_point() + facet_grid(method~set_type)
+```
+
+Observation: 
+ - Overall, the test accuracy is closed to the accuracy when we know the true topics. That means our training process is correct and the low accuracy is not caused by computation.
+
+
+
+
+
+
+
+
+
+
+
+
