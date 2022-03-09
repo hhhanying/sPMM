@@ -14,6 +14,9 @@ confi = "../../configurations/configurations_membership_dataset.csv"
 confi = read.csv(confi)
 ```
 
+
+### accuracy
+
 ```{r}
 accuracy = data.frame(matrix(nrow = 0, ncol = 7))
 
@@ -70,10 +73,6 @@ accuracy %>%
 Observation: 
  - Overall, the test accuracy is closed to the accuracy when we know the true topics. That means our training process is correct and the low accuracy is not caused by computation.
 
-```{r}
-accuracy %>% filter(set_index == 32 & setting == 'training') %>% 
-  ggplot(aes(x = k0, y = accu, color = method)) + geom_point() + facet_grid(.~set_type)
-```
 
 
 ```{r}
@@ -105,8 +104,224 @@ Observations:
 
 
 
+### membership
+
+
+```{r}
+# set 10:
+# k0 = k1 = 2, d = 20, nlabel = 6
+set_index = 10
+set_type = 'balanced'
+res_path = paste0('../res/', set_type, '_', set_index, '/')
+
+accuracy %>% filter(set_index == 10 & set_type == 'balanced') %>% select(k0, k1, setting, method, accu) %>% ggplot(aes(x = k0, y = accu, color = method, shape = setting)) + geom_point()
+
+# truth
+paste0(res_path, 'data/model/rho.csv') %>% read.csv(header = FALSE)
+G = paste0(res_path, 'data/test_set/G.csv') %>% read.csv(header = FALSE)
+Y = paste0(res_path, 'data/test_set/Y.csv') %>% read.csv(header = FALSE)
+G$Category = factor(Y[[1]])
+G %>% pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+  ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+      geom_boxplot( ) + ggtitle("true G")
+    
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'supervised_', k0, '_', k0, '/G.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("G when k0 = ", k0))
+  print(p)
+}
+
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'unsupervised_', k0, '_', k0, '/U.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("U when k0 = ", k0))
+  print(p)
+}
+
+
+```
 
 
 
+```{r}
+# set 10:
+# k0 = k1 = 2, d = 20, nlabel = 6
+set_index = 10
+set_type = 'unbalanced'
+res_path = paste0('../res/', set_type, '_', set_index, '/')
 
+accuracy %>% filter(set_index == 10 & set_type == 'balanced') %>% select(k0, k1, setting, method, accu) %>% ggplot(aes(x = k0, y = accu, color = method, shape = setting)) + geom_point()
+
+# truth
+paste0(res_path, 'data/model/rho.csv') %>% read.csv(header = FALSE)
+G = paste0(res_path, 'data/test_set/G.csv') %>% read.csv(header = FALSE)
+Y = paste0(res_path, 'data/test_set/Y.csv') %>% read.csv(header = FALSE)
+G$Category = factor(Y[[1]])
+G %>% pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+  ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+      geom_boxplot( ) + ggtitle("true G")
+    
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'supervised_', k0, '_', k0, '/G.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("G when k0 = ", k0))
+  print(p)
+}
+
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'unsupervised_', k0, '_', k0, '/U.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("U when k0 = ", k0))
+  print(p)
+}
+
+
+```
+
+
+It seems to agree with the conclusion that supervised model is more robust to misspecified k0 and k1.
+
+
+
+```{r}
+# set 45:
+# k0 = k1 = 10, d = 20, nlabel = 6
+set_index = 45
+set_type = 'balanced'
+res_path = paste0('../res/', set_type, '_', set_index, '/')
+
+accuracy %>% filter(set_index == 10 & set_type == 'balanced') %>% select(k0, k1, setting, method, accu) %>% ggplot(aes(x = k0, y = accu, color = method, shape = setting)) + geom_point()
+
+# truth
+paste0(res_path, 'data/model/rho.csv') %>% read.csv(header = FALSE)
+G = paste0(res_path, 'data/test_set/G.csv') %>% read.csv(header = FALSE)
+Y = paste0(res_path, 'data/test_set/Y.csv') %>% read.csv(header = FALSE)
+G$Category = factor(Y[[1]])
+G %>% pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+  ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+      geom_boxplot( ) + ggtitle("true G")
+
+paste0(res_path, 'true/G_', set_index, '.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle('G with true topics')
+
+tem = paste0(res_path, 'true/U_', set_index, '.csv') %>% 
+    read.csv(header = FALSE) 
+tem[301:400,] %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle('U with true topics')
+    
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'supervised_', k0, '_', k0, '/G.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("G when k0 = ", k0))
+  print(p)
+}
+
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'unsupervised_', k0, '_', k0, '/U.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("U when k0 = ", k0))
+  print(p)
+}
+
+
+```
+
+
+
+```{r}
+# set 45:
+# k0 = k1 = 10, d = 20, nlabel = 6
+set_index = 45
+set_type = 'unbalanced'
+res_path = paste0('../res/', set_type, '_', set_index, '/')
+
+accuracy %>% filter(set_index == 10 & set_type == 'balanced') %>% select(k0, k1, setting, method, accu) %>% ggplot(aes(x = k0, y = accu, color = method, shape = setting)) + geom_point()
+
+# truth
+paste0(res_path, 'data/model/rho.csv') %>% read.csv(header = FALSE)
+G = paste0(res_path, 'data/test_set/G.csv') %>% read.csv(header = FALSE)
+Y = paste0(res_path, 'data/test_set/Y.csv') %>% read.csv(header = FALSE)
+G$Category = factor(Y[[1]])
+G %>% pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+  ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+      geom_boxplot( ) + ggtitle("true G")
+paste0(res_path, 'true/G_', set_index, '.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle('G with true topics')
+
+tem = paste0(res_path, 'true/U_', set_index, '.csv') %>% 
+    read.csv(header = FALSE) 
+tem[301:400,] %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle('U with true topics')
+
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'supervised_', k0, '_', k0, '/G.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("G when k0 = ", k0))
+  print(p)
+}
+
+for(k0 in c(2, 5, 10)){
+  p = paste0(res_path, 'unsupervised_', k0, '_', k0, '/U.csv') %>% 
+    read.csv(header = FALSE) %>%
+    mutate(Category = factor(Y[[1]])) %>%
+    pivot_longer(!Category, names_to = "topic", values_to = "membership") %>%
+    ggplot(aes_string(x="topic", y = "membership", color = "Category")) +
+    geom_boxplot( ) + 
+    ggtitle(paste0("U when k0 = ", k0))
+  print(p)
+}
+
+
+```
+
+Observation:
+
+ - When k0 and k1 is large, it's hard for unsupervised model to learn meaningful topics and memberships, even if the true k0 and k1 is also large and even if the true topics are given. But unsupervised model can still capture some patterns of the data.
 
