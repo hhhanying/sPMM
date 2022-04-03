@@ -1,3 +1,0 @@
-mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, d, k0, k1, nlabel, ntrace, nchain, nskip, Ntrain, Ntest, Nfold
-0,5,2,4,20,2,5,2,100,1,2,50,10,5
-0,5,2,4,20,2,5,4,100,1,2,50,10,5
