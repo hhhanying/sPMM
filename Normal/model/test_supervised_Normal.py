@@ -1,13 +1,17 @@
 import numpy as np
 from scipy.stats import norm
 from scipy.special import logsumexp
-def test_supervised_Normal(X, nsample, a, rho, Tau, Lambda, T):
+
+def test_supervised_Normal(X, nsample, a, rho, Tau, Lambda, T, w = None):
     '''
     With return the retimated labels and the posterior distribution of labels
     '''
     nlabel = len(T)
     N = len(X)
     d = len(X[0])
+    if not w: # if no info, assume uniform
+        w = np.zeros(nlabel)
+
 
     probs = []
     for j in range(N):
@@ -23,7 +27,7 @@ def test_supervised_Normal(X, nsample, a, rho, Tau, Lambda, T):
 
             xs = np.tile(X[j,], (nsample, 1))
             likelihoods = norm.pdf(xs, mus, sigmas)
-            loglikelihood = logsumexp(np.log(likelihoods).sum(axis = 1)) # since we use the same nsample, no need to subtract log(nsample)
+            loglikelihood = np.log(w[y]) + logsumexp(np.log(likelihoods).sum(axis = 1)) # since we use the same nsample, no need to subtract log(nsample)
 
             tem.append(loglikelihood)
 
