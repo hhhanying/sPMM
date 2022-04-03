@@ -12,6 +12,7 @@ def train_supervised_Normal(X, Y, K, b, alpha, T, mu_Mu, sigma2_Mu, alpha_Lambda
     mu_Mu, sigma2_Mu: the prior of Mu is N(mu_Mu, sigma2_Mu/Lambda)
     alpha_Lambda, beta_Lambda: the prior of Lambda is Gamma(alpha_Lambda, beta_Lambda)
     ntrace, nchain, nskip: parameters of sampling
+    
     output: a directionary.
     a,rho, Mu Lambda: estimate of parameters
     G: estimate of memberships of training set

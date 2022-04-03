@@ -4,7 +4,9 @@ from scipy.special import logsumexp
 
 def test_supervised_Normal(X, nsample, a, rho, Tau, Lambda, T, w = None):
     '''
-    With return the retimated labels and the posterior distribution of labels
+    Given the estimated model, return the retimated labels and the posterior distribution of labels.
+    res["labels"]: the list of estmate labels
+    res["loglikelihood"]: the list of the posterior distribution.
     '''
     nlabel = len(T)
     N = len(X)
