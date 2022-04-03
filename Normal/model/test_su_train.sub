@@ -1,0 +1,19 @@
+universe = docker
+docker_image = hanyingj/pymc3-sklearn
+
+executable = test_su_train.sh
+
+transfer_input_files=/home/hjiang252/Normal/model
+
+# requesting resources
+request_memory=4GB
+request_cpus=1
+request_disk=150000KB
+
+
+
+# log files
+error= err$(Process).err
+output= out$(Process).out
+log= log$(Process).log
+queue 1
