@@ -12,7 +12,7 @@ def test_supervised_Normal(X, nsample, a, rho, Tau, Lambda, T, w = None):
     N = len(X)
     d = len(X[0])
     if not w: # if no info, assume uniform
-        w = np.zeros(nlabel)
+        w = np.ones(nlabel)
 
 
     probs = []
