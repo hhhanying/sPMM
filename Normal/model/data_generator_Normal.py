@@ -1,4 +1,3 @@
-from tkinter import N
 import numpy as np
 
 def document_generator_Normal(a, rho, T, Lambda, Tau, N, w = None):
