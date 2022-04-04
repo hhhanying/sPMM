@@ -1,0 +1,1 @@
+This folder contains the functions useful to implement the model, including simulate from the model, estimate the parameters from training set, predict labels for test set and estimate memberships given the model.
