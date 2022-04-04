@@ -1,6 +1,5 @@
 import numpy as np
 import pymc3 as pm
-import theano
 
 def train_unsupervised_Normal(X, Y, K, b, alpha, mu_Mu, sigma2_Mu, alpha_Lambda, beta_Lambda, ntrace, nchain, nskip):
     '''
