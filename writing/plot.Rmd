@@ -102,34 +102,35 @@ ggsave("sPMM.png", dpi = 300, width = 5, height = 5)
 
 ```
 
+#### prior
 ```{r}
-library(DirichletReg)
+N <- 1000
+data.frame(p = rep(seq(0, 1, length.out = N), 3), a = rep(c(0.5, 1, 2), each = N), b = rep(c(0.5, 1, 5), each = N), prior = rep(c("(0.5, 0.5)", "(1, 1)", "(2, 5)"), each = N)) %>%
+  mutate(pdf = dbeta(p, a, b)) %>%
+  ggplot(aes(x = p, y = pdf, color = prior)) +
+  #geom_point(size = 0.1)
+  geom_line()
 
-mux <- c(-1, 0, 1)
-sigmax <- c(1, 1, 1)
-muy <- c(1, 0, 1)
-sigmay <- c(1, 1, 1)
-
-lambdax <- 1 / (sigmax ** 2)
-lambday <- 1 / (sigmay ** 2)
-taux <- mux / (sigmax ** 2)
-tauy <- muy / (sigmay ** 2)
-
-alpha1 <- c(1, 1, 1)
-alpha2 <- c(1, 1)
-set.seed(0)
-
-###
-N = 100
-G1 <- rdirichlet(n = N, alpha = alpha1)
-G2 <- rdirichlet(n = N, alpha = alpha2)
-
-### BPM
-tauX <- 
-
-
+ggsave("prior_bernoulli.png", dpi = 300, width = 7, height = 5)
 ```
 
-
-
+```{r}
+set.seed(0)
+N <- 1000
+a <- c(0.5, 1, 2)
+b <- c(0.5, 1, 5)
+K <- 3
+alpha2 <- c(1, 1)
+G2 <- rdirichlet(n = N, alpha = alpha2)
+n1 <- N %/% 2
+G2_trans <- matrix(rep(0, N * nlabel), nrow = N)
+G2_trans[, 3] <- G2[, 2]
+G2_trans[1:n1, 1] <- G2[1:n1, 1] 
+G2_trans[(n1 + 1):N, 2] <- G2[(n1 + 1):N, 1]
+for (i in 1:3){
+  p <- matrix(rbeta(K * 2, a[i], b[i]), ncol = 2)
+  logit <- log(p / (1 - p))
+  
+}
+```
 
