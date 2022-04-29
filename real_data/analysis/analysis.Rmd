@@ -30,7 +30,18 @@ prediction %>% group_by(method, k0) %>%
   summarize(accuracy = mean(correct)) %>% 
   ggplot(aes(x = k0, y = accuracy, color = method)) +
   geom_point(size=0.7) +
-  labs(x="k0 (k1=k0)")
+  labs(x="k0 (k1=k0)") +
+  ggtitle("The accuracy of both models with different k0")
+ggsave("figures/accuracy_k0.png", dpi = 300, width= 8, height = 6)
+
+prediction %>% group_by(method, k0, true) %>%
+  summarize(accuracy = mean(correct)) %>%
+  mutate(true = factor(true, labels = c("sepsis", "nonsepsis_ICU", "healthy", "healthy_antibiotics"))) %>%
+  ggplot(aes(x = k0, y = accuracy, color = true, linetype = method)) +
+  geom_line() +
+  ggtitle("The accuracy of both model on different categories")
+ggsave("figures/accuracy_k0_perclass.png", dpi = 300, width= 8, height = 6)
+
 ```
 ```{r,echo=FALSE, message = FALSE, warining = FALSE}
 prediction %>% group_by(method, k0, true) %>%
@@ -191,3 +202,153 @@ dat2 %>% pivot_longer(starts_with("V"), names_to="feature", values_to = "observa
   geom_density()+
   facet_grid(Category~feature)
 ```
+
+
+#### dominant
+```{r}
+# check whether U tend to be 
+k0 = 1
+su_res_folder <- sprintf("../res/submit_CHTC/supervised/wholeset/model%s/", k0)
+un_res_folder <- sprintf("../res/submit_CHTC/unsupervised/wholeset/model%s/", k0)
+G <- read.csv(paste0(su_res_folder, "G.csv"), header = F)
+U <- read.csv(paste0(un_res_folder, "U.csv"), header = F)
+U_su <- read.csv(paste0(su_res_folder, "U.csv"), header = F)
+U_un <- read.csv(paste0(un_res_folder, "U_prediction.csv"), header = F)
+dat <- read.csv('../data/cleaned_data.csv')
+G$sample <- dat$sample
+U$sample <- dat$sample
+U_su$sample <- dat$sample
+U_un$sample <- dat$sample
+
+dat$Category <- factor(dat$Category, labels = c("sepsis", "nonsepsis_ICU", "healthy", "healthy_antibiotics"))
+G$Category <- dat$Category
+U$Category <- dat$Category
+U_su$Category <- dat$Category
+U_un$Category <- dat$Category
+
+p_membership <- function(x){
+  p = x %>% pivot_longer(cols = -c("sample", "Category"), names_to = "topic", values_to = "membership") %>%
+    ggplot(aes(x = topic, y = sample, fill = membership)) +
+    facet_grid(Category~.,scales="free_y")+
+    #coord_flip() +
+    
+    geom_tile()
+  print(p)
+}
+p_membership(G)
+p_membership(U)
+p_membership(U_su)
+ggsave("figures/G_unsupervised1.png", dpi = 300, width = 8, height = 6)
+p_membership(U_un)
+ggsave("figures/U_1.png", dpi = 300, width = 8, height = 6)
+```
+
+```{r}
+taxa = colnames(dat)[2:241]
+sim_su <- read.csv("simulated/supervised1.csv", header = F) 
+sim_un <- read.csv("simulated/unsupervised1.csv", header = F) 
+colnames(sim_su) = taxa
+colnames(sim_un) = taxa
+set.seed(0)
+ntaxa = 30
+plot_taxa = sample(taxa, ntaxa)
+sim_su[,c("sample", "Category")] = dat[,c("sample", "Category")]
+sim_un[,c("sample", "Category")] = dat[,c("sample", "Category")]
+
+rare_sample = dat$sample[dat$Category %in% c("nonsepsis_ICU","healthy_antibiotics")]
+plot_frame = function(x, type){
+  x %>% 
+    pivot_longer(cols = -c("sample", "Category"), names_to = "feature", values_to = "value") %>% 
+    mutate(type = type)%>%
+    filter(sample %in% rare_sample) %>%
+    filter(feature %in% plot_taxa)
+}
+  
+t1 = plot_frame(dat, 'Truth')
+t2 = plot_frame(sim_su, 'sPMM')
+t3 = plot_frame(sim_un, 'BPM')
+
+rbind(t1, t2, t3) %>% ggplot(aes(x = sample, y = feature, fill = value)) +
+  facet_wrap(.~type)+
+  geom_tile()
+
+
+
+```
+
+```{r}
+t11 = pivot_wider(t1, id_cols = 'sample', names_from = "feature", values_from = "value")
+t21 = pivot_wider(t2, id_cols = 'sample', names_from = "feature", values_from = "value")
+t31 = pivot_wider(t3, id_cols = 'sample', names_from = "feature", values_from = "value")
+
+d_su = t21
+for(i in plot_taxa){
+  d_su[,i] = d_su[,i] - t11[, i]
+}
+d_un = t31
+for(i in plot_taxa){
+  d_un[,i] = d_un[,i] - t11[, i]
+}
+tem = d_su %>% pivot_longer(cols = -c("sample"), names_to = "feature", values_to = "value") %>%
+  mutate(type = "sPMM") %>%
+  rbind(d_un %>% pivot_longer(cols = -c("sample"), names_to = "feature", values_to = "value") %>%
+  mutate(type = "BPM")) 
+dif = abs(tem$value)
+min(dif)
+max(dif)
+# tem$diff = case_when(
+#   dif < -5 ~ "< -"
+# )
+round(dif)
+tem%>%
+  mutate(diff = round(abs(value) %/% 3)) %>%
+  mutate(difference = factor(diff, levels = 0:5, labels = c("<3", "3-6", "6-9", "9-12", "12-15", ">15"), ordered = T)) %>%
+    ggplot(aes(x = sample, y = feature, fill =difference)) +
+    facet_wrap(.~type) +
+    geom_tile()
+ggsave("figures/difference.png", dpi = 300, width = 8, height = 6)
+
+```
+
+
+```{r}
+sim_su <- read.csv("simulated/supervised1.csv", header = F) %>% data.matrix()
+sim_un <- read.csv("simulated/unsupervised1.csv", header = F)  %>% data.matrix()
+image(
+    t(data.matrix(dat[2:241])), # image() has some weird opinions about how your matrix will be plotted
+    axes = FALSE,
+    col = colorRampPalette(c("white", "darkorange", "black"))(30), # our colour palette
+    breaks = c(seq(0, 3, length.out = 30), 100) # colour-to-value mapping
+)
+image(
+    t(sim_su), # image() has some weird opinions about how your matrix will be plotted
+    axes = FALSE,
+    col = colorRampPalette(c("white", "darkorange", "black"))(30), # our colour palette
+    breaks = c(seq(0, 3, length.out = 30), 100) # colour-to-value mapping
+)
+image(
+    t(sim_un), # image() has some weird opinions about how your matrix will be plotted
+    axes = FALSE,
+    col = colorRampPalette(c("white", "darkorange", "black"))(30), # our colour palette
+    breaks = c(seq(0, 3, length.out = 30), 100) # colour-to-value mapping
+)
+```
+```{r}
+suppressPackageStartupMessages(library(dplyr))
+library(purrr)
+Ncol <- 50
+genmat <- map(
+    1:20000,
+    function(i) {
+        runif(Ncol) + c(sort(abs(rnorm(50)))[1:25], rev(sort(abs(rnorm(50)))[1:25]))  * i/5000
+    }
+) %>% do.call(rbind, .)
+image(
+    t(genmat), # image() has some weird opinions about how your matrix will be plotted
+    axes = FALSE,
+    col = colorRampPalette(c("white", "darkorange", "black"))(30), # our colour palette
+    breaks = c(seq(0, 3, length.out = 30), 100) # colour-to-value mapping
+)
+box()
+```
+
